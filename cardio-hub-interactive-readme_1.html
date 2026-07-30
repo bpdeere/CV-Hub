@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clinical Cardiology Tools Hub</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #ffffff;
+    --bg2: #f7f7f5;
+    --bg3: #f0efe9;
+    --border: rgba(0,0,0,0.1);
+    --border2: rgba(0,0,0,0.18);
+    --text: #1a1a1a;
+    --text2: #5a5a58;
+    --text3: #8a8a87;
+    --blue-bg: #E6F1FB;
+    --blue-text: #0C447C;
+    --blue-border: #85B7EB;
+    --teal-bg: #E1F5EE;
+    --teal-text: #085041;
+    --teal-border: #5DCAA5;
+    --amber-bg: #FAEEDA;
+    --amber-text: #633806;
+    --amber-border: #EF9F27;
+    --green-bg: #EAF3DE;
+    --green-text: #27500A;
+    --green-border: #97C459;
+    --red-bg: #FCEBEB;
+    --red-text: #791F1F;
+    --red-border: #F09595;
+    --gray-bg: #F1EFE8;
+    --gray-text: #444441;
+    --accent: #378ADD;
+    --radius: 8px;
+    --radius-lg: 12px;
+    --sidebar-w: 200px;
+    --font: -apple-system, 'Segoe UI', sans-serif;
+    --mono: 'SF Mono', 'Fira Code', monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1a1a;
+      --bg2: #242424;
+      --bg3: #2e2e2e;
+      --border: rgba(255,255,255,0.1);
+      --border2: rgba(255,255,255,0.18);
+      --text: #e8e8e6;
+      --text2: #a0a09e;
+      --text3: #6a6a68;
+      --blue-bg: #0C447C;
+      --blue-text: #B5D4F4;
+      --blue-border: #185FA5;
+      --teal-bg: #085041;
+      --teal-text: #9FE1CB;
+      --teal-border: #0F6E56;
+      --amber-bg: #633806;
+      --amber-text: #FAC775;
+      --amber-border: #854F0B;
+      --green-bg: #27500A;
+      --green-text: #C0DD97;
+      --green-border: #3B6D11;
+      --red-bg: #791F1F;
+      --red-text: #F7C1C1;
+      --red-border: #A32D2D;
+      --gray-bg: #444441;
+      --gray-text: #D3D1C7;
+      --accent: #85B7EB;
+    }
+  }
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.6;
+    display: flex;
+    min-height: 100vh;
+  }
+  aside {
+    width: var(--sidebar-w);
+    background: var(--bg2);
+    border-right: 0.5px solid var(--border);
+    padding: 1.25rem 0;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  .sidebar-brand {
+    padding: 0 1rem 1.25rem;
+    border-bottom: 0.5px solid var(--border);
+    margin-bottom: 0.75rem;
+  }
+  .sidebar-brand .brand-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.4;
+  }
+  .sidebar-brand .brand-sub {
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 2px;
+  }
+  .nav-section {
+    padding: 0 0.5rem;
+    margin-bottom: 0.25rem;
+  }
+  .nav-section-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text3);
+    padding: 0.5rem 0.5rem 0.25rem;
+  }
+  .nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 6px 8px;
+    border: none;
+    background: transparent;
+    color: var(--text2);
+    font-size: 13px;
+    text-align: left;
+    cursor: pointer;
+    border-radius: var(--radius);
+    transition: background 0.1s, color 0.1s;
+  }
+  .nav-btn:hover { background: var(--bg3); color: var(--text); }
+  .nav-btn.active { background: var(--bg3); color: var(--text); font-weight: 500; }
+  .nav-btn svg { width: 15px; height: 15px; flex-shrink: 0; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  main {
+    flex: 1;
+    min-width: 0;
+    padding: 1.5rem 2rem;
+    max-width: 860px;
+  }
+  .search-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg2);
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 0 10px;
+    margin-bottom: 1.5rem;
+  }
+  .search-bar svg { width: 15px; height: 15px; stroke: var(--text3); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+  .search-bar input {
+    border: none;
+    background: transparent;
+    color: var(--text);
+    font-size: 13px;
+    padding: 8px 0;
+    width: 100%;
+    outline: none;
+    font-family: var(--font);
+  }
+  .search-bar input::placeholder { color: var(--text3); }
+  .page { display: none; }
+  .page.active { display: block; }
+  .page-title {
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    color: var(--text);
+  }
+  .page-sub {
+    font-size: 13px;
+    color: var(--text2);
+    margin-bottom: 1.5rem;
+  }
+  .calc-group {
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+  .calc-group-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--bg2);
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 0.5px solid transparent;
+    transition: background 0.1s;
+  }
+  .calc-group-header:hover { background: var(--bg3); }
+  .calc-group-header.open { border-bottom-color: var(--border); }
+  .calc-group-title { font-size: 13px; font-weight: 500; flex: 1; }
+  .calc-group-count {
+    font-size: 11px;
+    color: var(--text3);
+    background: var(--bg3);
+    padding: 2px 7px;
+    border-radius: 10px;
+    border: 0.5px solid var(--border);
+  }
+  .chevron { width: 14px; height: 14px; stroke: var(--text3); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.2s; }
+  .chevron.open { transform: rotate(180deg); }
+  .calc-group-body { display: none; padding: 10px 14px; background: var(--bg); }
+  .calc-group-body.open { display: block; }
+  .calc-item {
+    padding: 10px 0;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .calc-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .calc-item:first-child { padding-top: 0; }
+  .calc-name { font-size: 13px; font-weight: 500; margin-bottom: 3px; }
+  .calc-formula {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--accent);
+    background: var(--bg2);
+    padding: 3px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 4px;
+  }
+  .calc-desc { font-size: 12px; color: var(--text2); line-height: 1.5; }
+  .calc-ref {
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 3px;
+  }
+  .tool-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 10px;
+  }
+  .tool-card {
+    background: var(--bg);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .tool-card-top { display: flex; align-items: flex-start; gap: 10px; }
+  .tool-icon {
+    width: 36px; height: 36px;
+    border-radius: var(--radius);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .tool-icon svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .tool-name { font-size: 13px; font-weight: 500; line-height: 1.4; }
+  .tool-desc { font-size: 12px; color: var(--text2); line-height: 1.5; flex: 1; }
+  .tool-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 4px; }
+  .status-badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 500;
+  }
+  .status-built { background: var(--green-bg); color: var(--green-text); }
+  .status-stub { background: var(--amber-bg); color: var(--amber-text); }
+  .status-planned { background: var(--gray-bg); color: var(--gray-text); }
+  .launch-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    color: var(--accent);
+    background: var(--blue-bg);
+    border: 0.5px solid var(--blue-border);
+    border-radius: var(--radius);
+    padding: 4px 10px;
+    cursor: pointer;
+    text-decoration: none;
+    font-family: var(--font);
+    transition: opacity 0.1s;
+  }
+  .launch-btn:hover { opacity: 0.8; }
+  .launch-btn svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .ref-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+  .ref-card {
+    background: var(--bg);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1rem;
+  }
+  .ref-org { font-size: 11px; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text3); margin-bottom: 6px; }
+  .ref-title { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+  .ref-desc { font-size: 12px; color: var(--text2); line-height: 1.5; margin-bottom: 8px; }
+  .ref-links { display: flex; flex-wrap: wrap; gap: 6px; }
+  .ref-link {
+    font-size: 11px;
+    color: var(--accent);
+    text-decoration: none;
+    background: var(--blue-bg);
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 0.5px solid var(--blue-border);
+  }
+  .ref-link:hover { opacity: 0.8; }
+  .roadmap-section { margin-bottom: 1.5rem; }
+  .roadmap-phase-label {
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text3);
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .roadmap-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 0.5px solid var(--border);
+    font-size: 13px;
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-check {
+    width: 16px; height: 16px;
+    border-radius: 4px;
+    border: 1.5px solid var(--border2);
+    flex-shrink: 0;
+    margin-top: 1px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .roadmap-check.done {
+    background: var(--green-bg);
+    border-color: var(--green-border);
+  }
+  .roadmap-check.done svg { width: 10px; height: 10px; stroke: var(--green-text); fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+  .roadmap-text { flex: 1; line-height: 1.5; }
+  .roadmap-tag {
+    font-size: 11px;
+    padding: 1px 7px;
+    border-radius: 8px;
+    flex-shrink: 0;
+  }
+  .summary-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 1.5rem;
+  }
+  .stat-card {
+    background: var(--bg2);
+    border-radius: var(--radius);
+    padding: 12px;
+    text-align: center;
+  }
+  .stat-num { font-size: 22px; font-weight: 500; }
+  .stat-label { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .search-results { }
+  .search-result-item {
+    padding: 10px 0;
+    border-bottom: 0.5px solid var(--border);
+    cursor: pointer;
+  }
+  .search-result-item:hover .sr-name { color: var(--accent); }
+  .sr-name { font-size: 13px; font-weight: 500; transition: color 0.1s; }
+  .sr-cat { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .sr-desc { font-size: 12px; color: var(--text2); margin-top: 3px; }
+  .no-results { color: var(--text3); font-size: 13px; padding: 1rem 0; }
+  .file-chip {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text2);
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 7px;
+  }
+</style>
+</head>
+<body>
+
+<aside>
+  <div class="sidebar-brand">
+    <div class="brand-title">Cardiology Tools Hub</div>
+    <div class="brand-sub">UMMC CV Imaging Lab</div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Navigation</div>
+    <button class="nav-btn active" data-page="overview">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Overview
+    </button>
+    <button class="nav-btn" data-page="calculators">
+      <svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="14" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="10" y2="18"/><line x1="14" y1="18" x2="16" y2="18"/></svg>
+      Calculators
+    </button>
+    <button class="nav-btn" data-page="templates">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/></svg>
+      Templates & Protocols
+    </button>
+    <button class="nav-btn" data-page="pet">
+      <svg viewBox="0 0 24 24"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>
+      PET Tools
+    </button>
+    <button class="nav-btn" data-page="reference">
+      <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      Reference
+    </button>
+    <button class="nav-btn" data-page="roadmap">
+      <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      Roadmap
+    </button>
+  </div>
+</aside>
+
+<main>
+  <div class="search-bar">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" id="search-input" placeholder="Search tools, calculators, templates..." autocomplete="off">
+  </div>
+
+  <div id="search-results-page" class="page">
+    <div class="page-title" id="search-heading">Results</div>
+    <div class="page-sub" id="search-sub"></div>
+    <div class="search-results" id="search-results-list"></div>
+  </div>
+
+  <div id="page-overview" class="page active">
+    <div class="page-title">Clinical Cardiology Tools Hub</div>
+    <div class="page-sub">Cardiovascular Imaging Lab · University of Mississippi Medical Center · Bradley P. Deere, MD</div>
+    <div class="summary-stats">
+      <div class="stat-card"><div class="stat-num" style="color:var(--accent)">12</div><div class="stat-label">Calculators</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:#1D9E75">6</div><div class="stat-label">Report templates</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:#EF9F27">4</div><div class="stat-label">Files</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--text2)">6</div><div class="stat-label">Roadmap items</div></div>
+    </div>
+    <div class="tool-grid">
+      <div class="tool-card">
+        <div class="tool-card-top">
+          <div class="tool-icon" style="background:var(--blue-bg)">
+            <svg viewBox="0 0 24 24" style="stroke:var(--blue-text)"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="16" y2="10"/></svg>
+          </div>
+          <div>
+            <div class="tool-name">Cardio Tools Hub</div>
+            <span class="file-chip">cardio-tools-hub.html</span>
+          </div>
+        </div>
+        <div class="tool-desc">Core calculators, echo report templates, and DSE protocol. Main workhorse file.</div>
+        <div class="tool-footer">
+          <span class="status-badge status-built">Built</span>
+          <a class="launch-btn" href="cardio-tools-hub.html">Open <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+        </div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-card-top">
+          <div class="tool-icon" style="background:var(--teal-bg)">
+            <svg viewBox="0 0 24 24" style="stroke:var(--teal-text)"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>
+          </div>
+          <div>
+            <div class="tool-name">Cardiac PET Reporting</div>
+            <span class="file-chip">cardiac_pet_tool_1.html</span>
+          </div>
+        </div>
+        <div class="tool-desc">Structured PET interpretation and reporting with MBF quantification guidance.</div>
+        <div class="tool-footer">
+          <span class="status-badge status-built">Built</span>
+          <a class="launch-btn" href="cardiac_pet_tool_1.html">Open <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+        </div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-card-top">
+          <div class="tool-icon" style="background:var(--amber-bg)">
+            <svg viewBox="0 0 24 24" style="stroke:var(--amber-text)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="8" y1="13" x2="16" y2="13"/></svg>
+          </div>
+          <div>
+            <div class="tool-name">PET Dot Phrase Builder</div>
+            <span class="file-chip">dotphrase_builder.html</span>
+          </div>
+        </div>
+        <div class="tool-desc">Generates EHR-ready dot phrase language for cardiac PET reports.</div>
+        <div class="tool-footer">
+          <span class="status-badge status-built">Built</span>
+          <a class="launch-btn" href="dotphrase_builder.html">Open <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+        </div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-card-top">
+          <div class="tool-icon" style="background:var(--gray-bg)">
+            <svg viewBox="0 0 24 24" style="stroke:var(--gray-text)"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+          </div>
+          <div>
+            <div class="tool-name">Hub Shell</div>
+            <span class="file-chip">cardiology-hub-shell.html</span>
+          </div>
+        </div>
+        <div class="tool-desc">Outer sidebar navigation and iframe module loader. Entry point for the app.</div>
+        <div class="tool-footer">
+          <span class="status-badge status-built">Built</span>
+          <a class="launch-btn" href="cardiology-hub-shell.html">Open <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="page-calculators" class="page">
+    <div class="page-title">Calculators</div>
+    <div class="page-sub">Clinical echo and hemodynamic calculators with formula reference</div>
+
+    <div class="calc-group" data-group="lv">
+      <div class="calc-group-header" onclick="toggleGroup(this)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E24B4A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        <span class="calc-group-title">LV / Filling pressures</span>
+        <span class="calc-group-count">3</span>
+        <svg class="chevron" viewBox="0 0 24 24"><polyline points="6,9 12,15 18,9"/></svg>
+      </div>
+      <div class="calc-group-body">
+        <div class="calc-item">
+          <div class="calc-name">LV diastolic pressure</div>
+          <div class="calc-formula">LVdP = 1.06 × e^(0.148 × E/e′)</div>
+          <div class="calc-desc">Estimates LV end-diastolic pressure from tissue Doppler ratio. Useful when invasive data are unavailable.</div>
+          <div class="calc-ref">Ref: Nagueh SF et al. JACC 1997</div>
+        </div>
+        <div class="calc-item">
+          <div class="calc-name">LVOT gradient</div>
+          <div class="calc-formula">ΔP = 4 × V²</div>
+          <div class="calc-desc">Simplified Bernoulli equation applied to LVOT peak velocity. Also used for HOCM resting and provocable gradients.</div>
+          <div class="calc-ref">Ref: 2011 AHA/ACC HOCM Guideline</div>
+        </div>
+        <div class="calc-item">
+          <div class="calc-name">ePAWP (E/e′ method)</div>
+          <div class="calc-formula">ePAWP = 1.9 + (1.24 × E/e′)</div>
+          <div class="calc-desc">Non-invasive estimate of pulmonary artery wedge pressure. Septal e′ preferred; lateral e′ formula differs.</div>
+          <div class="calc-ref">Ref: Nagueh SF. JACC 2009; 2016 ASE Diastology Guidelines</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="calc-group" data-group="valvular">
+      <div class="calc-group-header" onclick="toggleGroup(this)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#378ADD" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+        <span class="calc-group-title">Valvular disease</span>
+        <span class="calc-group-count">3</span>
+        <svg class="chevron" viewBox="0 0 24 24"><polyline points="6,9 12,15 18,9"/></svg>
+      </div>
+      <div class="calc-group-body">
+        <div class="calc-item">
+          <div class="calc-name">AVA — continuity equation</div>
+          <div class="calc-formula">AVA = (CSA_LVOT × VTI_LVOT) / VTI_AV</div>
+          <div class="calc-desc">Gold standard for aortic valve area. Indexed AVA (iAVA = AVA/BSA) adjusts for body size. Severe AS: AVA &lt;1.0 cm², iAVA &lt;0.6 cm²/m².</div>
+          <div class="calc-ref">Ref: 2014 AHA/ACC Valvular Guidelines; 2021 update</div>
+        </div>
+        <div class="calc-item">
+          <div class="calc-name">MVA — pressure half-time</div>
+          <div class="calc-formula">MVA = 220 / PHT</div>
+          <div class="calc-desc">Empirical constant (220 ms·cm²) applied to mitral inflow deceleration slope. Less reliable post-commissurotomy.</div>
+          <div class="calc-ref">Ref: Hatle L et al. Circulation 1979; 2014 AHA/ACC Valvular Guidelines</div>
+        </div>
+        <div class="calc-item">
+          <div class="calc-name">MR PISA / EROA</div>
+          <div class="calc-formula">EROA = (2π × r² × Va) / Vpeak_MR</div>
+          <div class="calc-desc">Effective regurgitant orifice area by proximal isovelocity surface area. RVol = EROA × VTI_MR. Severe MR: EROA ≥0.4 cm², RVol ≥60 mL (primary).</div>
+          <div class="calc-ref">Ref: 2017 ASE MR Guidelines</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="calc-group" data-group="rightheart">
+      <div class="calc-group-header" onclick="toggleGroup(this)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1D9E75" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        <span class="calc-group-title">Right heart / pulmonary hemodynamics</span>
+        <span class="calc-group-count">6</span>
+        <svg class="chevron" viewBox="0 0 24 24"><polyline points="6,9 12,15 18,9"/></svg>
+      </div>
+      <div class="calc-group-body">
+        <div class="calc-item">
+          <div class="calc-name">IVC-based RAP</div>
+          <div class="calc-formula">RAP = 3 / 8 / 15 mmHg (by IVC + collapse)</div>
+          <div class="calc-desc">IVC &lt;2.1 cm + &gt;50% collapse = 3 mmHg; IVC &gt;2.1 cm + &lt;50% collapse = 15 mmHg; indeterminate = 8 mmHg.</div>
+          <div class="calc-ref">Ref: 2015 ASE RV Guidelines</div>
+        </div>
+        <div class="calc-item">
+          <div class="calc-name">RVSP</div>
+          <div class="calc-formula">RVSP = 4 × V²_TR + RAP</div>
+          <div class="calc-desc">Reflects PASP in the absence of RVOTO or pulmonic stenosis. Auto-populated from RAP.</div>
+          <div class="calc-ref">Ref: 2015 ASE RV Guidelines; 2022 ESC PH Guidelines</div>
+        </div>
+        <div class="calc-item">
+          <div class="calc-name">Mean PAP — Chemla</div>
+          <div class="calc-formula">mPAP = 0.61 × PASP + 2</div>
+          <div class="calc-desc">Widely used regression-derived formula. 2022 ESC threshold: mPAP &gt;20 mmHg defines PH (lowered from 25).</div>
+          <div class="calc-ref">Ref: Chemla D. Circulation 2004; 2022 ESC PH Guidelines</div>
+        </div>
+        <div class="calc-item">
+          <div class="calc-name">Mean PAP — PR velocity</div>
+          <div class="calc-formula">mPAP = 4 × V²_PR_early</div>
+          <div class="calc-desc">Early diastolic PR velocity reflects mPAP directly. Independent of TR signal quality.</div>
+          <div class="calc-ref">Ref: 2022 ESC PH Guidelines</div>
+        </div>
+        <div class="calc-item">
+          <div class="calc-name">PVR — Abbas formula</div>
+          <div class="calc-formula">PVR = 10 × (V_TR / TVI_RVOT)</div>
+          <div class="calc-desc">Non-invasive PVR estimate. ≥3 WU flags pre-capillary PH phenotype when mPAP is elevated.</div>
+          <div class="calc-ref">Ref: Abbas AE. JACC 2003</div>
+        </div>
+        <div class="calc-item">
+          <div class="calc-name">TAPSE/PASP coupling</div>
+          <div class="calc-formula">Coupling ratio = TAPSE (mm) / PASP (mmHg)</div>
+          <div class="calc-desc">RV-PA coupling index. &lt;0.55 mm/mmHg = uncoupled RV; TAPSE &lt;17 mm flagged independently per 2022 ESC.</div>
+          <div class="calc-ref">Ref: 2022 ESC PH Guidelines; Guazzi M. JACC 2013</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="calc-group" data-group="aortic">
+      <div class="calc-group-header" onclick="toggleGroup(this)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#EF9F27" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4,14 10,14 10,20"/><polyline points="20,10 14,10 14,4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+        <span class="calc-group-title">Aortic dimensions</span>
+        <span class="calc-group-count">3</span>
+        <svg class="chevron" viewBox="0 0 24 24"><polyline points="6,9 12,15 18,9"/></svg>
+      </div>
+      <div class="calc-group-body">
+        <div class="calc-item">
+          <div class="calc-name">Ascending aorta — Yale model</div>
+          <div class="calc-formula">Aortic index = diameter (cm) / BSA (m²)</div>
+          <div class="calc-desc">Threshold ≥2.75 cm/m² suggests intervention consideration in selected patients per Yale criteria.</div>
+          <div class="calc-ref">Ref: Elefteriades JA. Ann Thorac Surg 2002</div>
+        </div>
+        <div class="calc-item">
+          <div class="calc-name">Aortic root Z-score</div>
+          <div class="calc-formula">Z = (measured − predicted) / SD</div>
+          <div class="calc-desc">Sex-specific regression from Roman 1989. Predicted root diameter from BSA. Z ≥2 = dilated. Essential for Marfan/connective tissue evaluation.</div>
+          <div class="calc-ref">Ref: Roman MJ et al. Am J Cardiol 1989</div>
+        </div>
+        <div class="calc-item">
+          <div class="calc-name">Indexed dimensions table</div>
+          <div class="calc-formula">Index = segment (cm) / BSA (m²)</div>
+          <div class="calc-desc">Reference table: annulus, sinuses, STJ, ascending aorta, descending. Normal ranges and aneurysm thresholds per 2022 AHA/ACC Aorta Guidelines.</div>
+          <div class="calc-ref">Ref: 2022 AHA/ACC Aortic Disease Guidelines</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="calc-group" data-group="acs">
+      <div class="calc-group-header" onclick="toggleGroup(this)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E24B4A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="7.86,2 16.14,2 22,7.86 22,16.14 16.14,22 7.86,22 2,16.14 2,7.86"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span class="calc-group-title">ACS decision support</span>
+        <span class="calc-group-count">2</span>
+        <svg class="chevron" viewBox="0 0 24 24"><polyline points="6,9 12,15 18,9"/></svg>
+      </div>
+      <div class="calc-group-body">
+        <div class="calc-item">
+          <div class="calc-name">hs-Troponin — ESC 0/1h algorithm</div>
+          <div class="calc-formula">Rule-out: &lt;5 ng/L + Δ &lt;2 at 1h</div>
+          <div class="calc-desc">Roche Elecsys hs-cTnT. Rule-out (&lt;5 ng/L at 0h + delta &lt;2), rule-in (≥52 ng/L or Δ ≥5 at 1h), observe zone requires 3h sample.</div>
+          <div class="calc-ref">Ref: 2020 ESC NSTE-ACS Guidelines; Roche Elecsys package insert</div>
+        </div>
+        <div class="calc-item">
+          <div class="calc-name">hs-Troponin — ESC 0/2h algorithm</div>
+          <div class="calc-formula">Rule-out: &lt;12 ng/L + Δ &lt;3 at 2h</div>
+          <div class="calc-desc">Alternative pathway when 1h sample not feasible. Zone highlighting with clinical action recommendations per ESC 2020.</div>
+          <div class="calc-ref">Ref: 2020 ESC NSTE-ACS Guidelines</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="page-templates" class="page">
+    <div class="page-title">Templates & Protocols</div>
+    <div class="page-sub">Report templates and stress testing protocols — all in <span class="file-chip">cardio-tools-hub.html</span></div>
+    <div class="tool-grid">
+      <div class="tool-card">
+        <div class="tool-card-top">
+          <div class="tool-icon" style="background:var(--blue-bg)">
+            <svg viewBox="0 0 24 24" style="stroke:var(--blue-text)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/></svg>
+          </div>
+          <div>
+            <div class="tool-name">TTE report template</div>
+          </div>
+        </div>
+        <div class="tool-desc">Structured narrative TTE template with copy-to-clipboard and download. Covers all standard echo views and measurements.</div>
+        <div class="tool-footer">
+          <span class="status-badge status-built">Built</span>
+          <a class="launch-btn" href="cardio-tools-hub.html">Open hub <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+        </div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-card-top">
+          <div class="tool-icon" style="background:var(--teal-bg)">
+            <svg viewBox="0 0 24 24" style="stroke:var(--teal-text)"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+          </div>
+          <div>
+            <div class="tool-name">SPECT MPI — pharmacologic stress</div>
+          </div>
+        </div>
+        <div class="tool-desc">Full report template for pharmacologic stress nuclear MPI with perfusion, function, and impression fields.</div>
+        <div class="tool-footer">
+          <span class="status-badge status-built">Built</span>
+          <a class="launch-btn" href="cardio-tools-hub.html">Open hub <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+        </div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-card-top">
+          <div class="tool-icon" style="background:var(--teal-bg)">
+            <svg viewBox="0 0 24 24" style="stroke:var(--teal-text)"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>
+          </div>
+          <div>
+            <div class="tool-name">SPECT MPI — exercise stress</div>
+          </div>
+        </div>
+        <div class="tool-desc">Exercise stress variant of the nuclear MPI template. Same structure, stress mode substituted.</div>
+        <div class="tool-footer">
+          <span class="status-badge status-built">Built</span>
+          <a class="launch-btn" href="cardio-tools-hub.html">Open hub <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+        </div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-card-top">
+          <div class="tool-icon" style="background:var(--amber-bg)">
+            <svg viewBox="0 0 24 24" style="stroke:var(--amber-text)"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26 12,2"/></svg>
+          </div>
+          <div>
+            <div class="tool-name">DSE protocol</div>
+          </div>
+        </div>
+        <div class="tool-desc">Dobutamine stress echo protocol reference with target HR calculator (85% MPHR) and stage timing guide.</div>
+        <div class="tool-footer">
+          <span class="status-badge status-built">Built</span>
+          <a class="launch-btn" href="cardio-tools-hub.html">Open hub <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="page-pet" class="page">
+    <div class="page-title">PET Tools</div>
+    <div class="page-sub">Standalone cardiac PET interpretation and dot phrase tools</div>
+    <div class="tool-grid">
+      <div class="tool-card">
+        <div class="tool-card-top">
+          <div class="tool-icon" style="background:var(--teal-bg)">
+            <svg viewBox="0 0 24 24" style="stroke:var(--teal-text)"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>
+          </div>
+          <div>
+            <div class="tool-name">Cardiac PET Interpretation & Reporting</div>
+            <span class="file-chip">cardiac_pet_tool_1.html</span>
+          </div>
+        </div>
+        <div class="tool-desc">Structured PET reporting with MBF quantification guidance, retention vs. compartment model reference, and ASNC 2023 coverage policy notes.</div>
+        <div class="tool-footer">
+          <span class="status-badge status-built">Built</span>
+          <a class="launch-btn" href="cardiac_pet_tool_1.html">Open <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+        </div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-card-top">
+          <div class="tool-icon" style="background:var(--amber-bg)">
+            <svg viewBox="0 0 24 24" style="stroke:var(--amber-text)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/></svg>
+          </div>
+          <div>
+            <div class="tool-name">PET Dot Phrase Builder</div>
+            <span class="file-chip">dotphrase_builder.html</span>
+          </div>
+        </div>
+        <div class="tool-desc">Generates formatted dot phrase text for Epic/EHR insertion. Structured around standard PET reporting fields.</div>
+        <div class="tool-footer">
+          <span class="status-badge status-built">Built</span>
+          <a class="launch-btn" href="dotphrase_builder.html">Open <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:1.5rem; background:var(--bg2); border:0.5px solid var(--border); border-radius:var(--radius-lg); padding:1rem 1.25rem;">
+      <div style="font-size:13px; font-weight:500; margin-bottom:6px;">Vendor reference</div>
+      <div style="font-size:12px; color:var(--text2); line-height:1.6;">
+        Three generator options evaluated for UMMC program: Bracco CardioGen-82 (Rb-82), Jubilant Ruby-Fill (Rb-82), and GE Flyrcarda (F-18 flurpiridaz). Retention model (Rb-82) vs. compartment model (F-18) distinction relevant to MBF quantification accuracy at higher heart rates.
+      </div>
+    </div>
+  </div>
+
+  <div id="page-reference" class="page">
+    <div class="page-title">Reference</div>
+    <div class="page-sub">Guideline sources and key documents used throughout the hub</div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <div class="ref-org">ASE</div>
+        <div class="ref-title">American Society of Echocardiography</div>
+        <div class="ref-desc">Primary source for echo measurement standards, diastology grading, RV/PA guidelines, and valvular disease quantification.</div>
+        <div class="ref-links">
+          <a class="ref-link" href="https://www.asecho.org/guidelines/" target="_blank">Guidelines</a>
+          <a class="ref-link" href="https://www.asecho.org/guidelines/chamber-quantification/" target="_blank">Chamber quant 2015</a>
+          <a class="ref-link" href="https://www.asecho.org/guidelines/diastology-2016/" target="_blank">Diastology 2016</a>
+        </div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-org">ESC</div>
+        <div class="ref-title">European Society of Cardiology</div>
+        <div class="ref-desc">2020 NSTE-ACS guidelines (hs-troponin algorithms), 2022 PH guidelines (mPAP threshold, TAPSE/PASP coupling).</div>
+        <div class="ref-links">
+          <a class="ref-link" href="https://www.escardio.org/Guidelines/Clinical-Practice-Guidelines/Acute-Coronary-Syndromes-ACS-in-patients-presenting-without-persistent-ST-se" target="_blank">NSTE-ACS 2020</a>
+          <a class="ref-link" href="https://www.escardio.org/Guidelines/Clinical-Practice-Guidelines/Pulmonary-Hypertension" target="_blank">PH 2022</a>
+        </div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-org">AHA / ACC</div>
+        <div class="ref-title">American Heart Association / American College of Cardiology</div>
+        <div class="ref-desc">Valvular heart disease guidelines (2014, 2021 update), HOCM guidelines, 2022 Aortic Disease guidelines.</div>
+        <div class="ref-links">
+          <a class="ref-link" href="https://www.ahajournals.org/doi/10.1161/CIR.0000000000001042" target="_blank">Aorta 2022</a>
+          <a class="ref-link" href="https://www.ahajournals.org/doi/10.1161/CIR.0000000000000923" target="_blank">VHD 2021 update</a>
+        </div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-org">ASNC</div>
+        <div class="ref-title">American Society of Nuclear Cardiology</div>
+        <div class="ref-desc">Cardiac PET model coverage policy 2023, SPECT MPI interpretation standards, MBF quantification guidance. CPT 78492.</div>
+        <div class="ref-links">
+          <a class="ref-link" href="https://www.asnc.org/practice-management/coding-reimbursement/" target="_blank">Coding & reimbursement</a>
+          <a class="ref-link" href="https://www.asnc.org/guidelines-statements/" target="_blank">Guidelines</a>
+        </div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-org">IAC</div>
+        <div class="ref-title">Intersocietal Accreditation Commission</div>
+        <div class="ref-desc">Standards for echo lab accreditation used in stress echocardiography policy documentation for UMMC NICDS.</div>
+        <div class="ref-links">
+          <a class="ref-link" href="https://www.intersocietal.org/echo/" target="_blank">Echo standards</a>
+        </div>
+      </div>
+      <div class="ref-card">
+        <div class="ref-org">Key papers</div>
+        <div class="ref-title">Foundational references</div>
+        <div class="ref-desc">Roman MJ (aortic Z-scores, 1989) · Abbas AE (PVR formula, JACC 2003) · Chemla D (mPAP regression, 2004) · Hatle L (MVA PHT, 1979) · Nagueh SF (ePAWP, 1997/2009)</div>
+        <div class="ref-links">
+          <a class="ref-link" href="https://pubmed.ncbi.nlm.nih.gov/" target="_blank">PubMed</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="page-roadmap" class="page">
+    <div class="page-title">Roadmap</div>
+    <div class="page-sub">Build status and planned enhancements</div>
+
+    <div class="roadmap-section">
+      <div class="roadmap-phase-label">Built — current</div>
+      <div class="roadmap-item">
+        <div class="roadmap-check done"><svg viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg></div>
+        <div class="roadmap-text">Hub shell with sidebar navigation and iframe module registry</div>
+        <span class="roadmap-tag status-badge status-built">Done</span>
+      </div>
+      <div class="roadmap-item">
+        <div class="roadmap-check done"><svg viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg></div>
+        <div class="roadmap-text">LV/filling pressure calculators (LVdP, LVOT gradient, ePAWP)</div>
+        <span class="roadmap-tag status-badge status-built">Done</span>
+      </div>
+      <div class="roadmap-item">
+        <div class="roadmap-check done"><svg viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg></div>
+        <div class="roadmap-text">Valvular disease calculators (AVA, MVA, MR PISA/EROA)</div>
+        <span class="roadmap-tag status-badge status-built">Done</span>
+      </div>
+      <div class="roadmap-item">
+        <div class="roadmap-check done"><svg viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg></div>
+        <div class="roadmap-text">Right heart / pulmonary hemodynamics suite (RAP, RVSP, mPAP ×2, PVR, TAPSE/PASP)</div>
+        <span class="roadmap-tag status-badge status-built">Done</span>
+      </div>
+      <div class="roadmap-item">
+        <div class="roadmap-check done"><svg viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg></div>
+        <div class="roadmap-text">Aortic dimensions (Yale model, Roman Z-score, indexed reference table)</div>
+        <span class="roadmap-tag status-badge status-built">Done</span>
+      </div>
+      <div class="roadmap-item">
+        <div class="roadmap-check done"><svg viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg></div>
+        <div class="roadmap-text">hs-Troponin ACS algorithm (ESC 0/1h, 0/2h, Roche Elecsys)</div>
+        <span class="roadmap-tag status-badge status-built">Done</span>
+      </div>
+      <div class="roadmap-item">
+        <div class="roadmap-check done"><svg viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg></div>
+        <div class="roadmap-text">TTE, SPECT MPI ×2, and DSE report templates</div>
+        <span class="roadmap-tag status-badge status-built">Done</span>
+      </div>
+      <div class="roadmap-item">
+        <div class="roadmap-check done"><svg viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg></div>
+        <div class="roadmap-text">Cardiac PET interpretation tool + dot phrase builder</div>
+        <span class="roadmap-tag status-badge status-built">Done</span>
+      </div>
+    </div>
+
+    <div class="roadmap-section">
+      <div class="roadmap-phase-label">Phase 2 — next</div>
+      <div class="roadmap-item">
+        <div class="roadmap-check"></div>
+        <div class="roadmap-text">Refactor: break inner hub tabs into outer sidebar as discrete iframe modules (eliminate two-chrome tradeoff)</div>
+        <span class="roadmap-tag status-badge status-stub">In progress</span>
+      </div>
+      <div class="roadmap-item">
+        <div class="roadmap-check"></div>
+        <div class="roadmap-text">Diastology module — E/A, e′, E/e′, LA volume index, ASE 2016 grade classifier</div>
+        <span class="roadmap-tag status-badge status-stub">Stub</span>
+      </div>
+      <div class="roadmap-item">
+        <div class="roadmap-check"></div>
+        <div class="roadmap-text">LV geometry module — RWT, LV mass index, concentric/eccentric remodeling classifier</div>
+        <span class="roadmap-tag status-badge status-stub">Stub</span>
+      </div>
+    </div>
+
+    <div class="roadmap-section">
+      <div class="roadmap-phase-label">Phase 3 — planned</div>
+      <div class="roadmap-item">
+        <div class="roadmap-check"></div>
+        <div class="roadmap-text">Strain reference tool — GLS normal ranges by vendor and acquisition protocol</div>
+        <span class="roadmap-tag status-badge status-planned">Planned</span>
+      </div>
+      <div class="roadmap-item">
+        <div class="roadmap-check"></div>
+        <div class="roadmap-text">Nuclear MPI interpretation guide / "Deere Method" SPECT systematic approach reference</div>
+        <span class="roadmap-tag status-badge status-planned">Planned</span>
+      </div>
+      <div class="roadmap-item">
+        <div class="roadmap-check"></div>
+        <div class="roadmap-text">Research tools — MWCCS / RURAL study echo parameter reference cards</div>
+        <span class="roadmap-tag status-badge status-planned">Planned</span>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+const pages = {
+  overview: document.getElementById('page-overview'),
+  calculators: document.getElementById('page-calculators'),
+  templates: document.getElementById('page-templates'),
+  pet: document.getElementById('page-pet'),
+  reference: document.getElementById('page-reference'),
+  roadmap: document.getElementById('page-roadmap'),
+};
+const navBtns = document.querySelectorAll('.nav-btn[data-page]');
+const searchResultsPage = document.getElementById('search-results-page');
+const searchInput = document.getElementById('search-input');
+let currentPage = 'overview';
+
+function showPage(key) {
+  Object.values(pages).forEach(p => p.classList.remove('active'));
+  searchResultsPage.classList.remove('active');
+  navBtns.forEach(b => b.classList.toggle('active', b.dataset.page === key));
+  if (pages[key]) { pages[key].classList.add('active'); currentPage = key; }
+}
+
+navBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    searchInput.value = '';
+    showPage(btn.dataset.page);
+  });
+});
+
+function toggleGroup(header) {
+  const body = header.nextElementSibling;
+  const chevron = header.querySelector('.chevron');
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  chevron.classList.toggle('open', !isOpen);
+  header.classList.toggle('open', !isOpen);
+}
+
+const searchIndex = [
+  { name: 'LV diastolic pressure', cat: 'Calculators — LV/Filling', desc: 'Estimates LVEDP from E/e′ ratio', page: 'calculators' },
+  { name: 'LVOT gradient', cat: 'Calculators — LV/Filling', desc: 'Simplified Bernoulli, HOCM obstruction', page: 'calculators' },
+  { name: 'ePAWP', cat: 'Calculators — LV/Filling', desc: 'Non-invasive pulmonary artery wedge pressure estimate', page: 'calculators' },
+  { name: 'AVA continuity equation', cat: 'Calculators — Valvular', desc: 'Aortic valve area, indexed AVA, severe AS thresholds', page: 'calculators' },
+  { name: 'MVA pressure half-time', cat: 'Calculators — Valvular', desc: 'Mitral valve area from inflow deceleration slope', page: 'calculators' },
+  { name: 'MR PISA / EROA', cat: 'Calculators — Valvular', desc: 'Mitral regurgitation effective orifice area and regurgitant volume', page: 'calculators' },
+  { name: 'IVC-based RAP', cat: 'Calculators — Right heart', desc: '2015 ASE IVC size and collapse criteria', page: 'calculators' },
+  { name: 'RVSP', cat: 'Calculators — Right heart', desc: 'TR velocity + RAP, reflects PASP', page: 'calculators' },
+  { name: 'Mean PAP — Chemla', cat: 'Calculators — Right heart', desc: '0.61 × PASP + 2, 2022 ESC threshold', page: 'calculators' },
+  { name: 'Mean PAP — PR velocity', cat: 'Calculators — Right heart', desc: 'Early diastolic PR velocity method', page: 'calculators' },
+  { name: 'PVR — Abbas formula', cat: 'Calculators — Right heart', desc: 'Non-invasive pulmonary vascular resistance, pre-capillary PH threshold', page: 'calculators' },
+  { name: 'TAPSE/PASP coupling', cat: 'Calculators — Right heart', desc: 'RV-PA coupling index, <0.55 = uncoupled', page: 'calculators' },
+  { name: 'Ascending aorta — Yale model', cat: 'Calculators — Aortic', desc: 'Aortic index ≥2.75 cm/m² threshold', page: 'calculators' },
+  { name: 'Aortic root Z-score', cat: 'Calculators — Aortic', desc: 'Roman 1989 sex-specific regression, Marfan evaluation', page: 'calculators' },
+  { name: 'Aortic indexed dimensions', cat: 'Calculators — Aortic', desc: 'Annulus to descending aorta reference table', page: 'calculators' },
+  { name: 'hs-Troponin 0/1h algorithm', cat: 'Calculators — ACS', desc: 'ESC 0/1h pathway, Roche Elecsys cutoffs', page: 'calculators' },
+  { name: 'hs-Troponin 0/2h algorithm', cat: 'Calculators — ACS', desc: 'ESC 0/2h pathway, zone highlighting', page: 'calculators' },
+  { name: 'TTE report template', cat: 'Templates & Protocols', desc: 'Structured narrative echocardiography report', page: 'templates' },
+  { name: 'SPECT MPI — pharmacologic', cat: 'Templates & Protocols', desc: 'Nuclear MPI pharmacologic stress report template', page: 'templates' },
+  { name: 'SPECT MPI — exercise', cat: 'Templates & Protocols', desc: 'Nuclear MPI exercise stress report template', page: 'templates' },
+  { name: 'DSE protocol', cat: 'Templates & Protocols', desc: 'Dobutamine stress echo protocol with target HR calculator', page: 'templates' },
+  { name: 'Cardiac PET interpretation', cat: 'PET Tools', desc: 'Structured PET reporting, MBF quantification, ASNC 2023', page: 'pet' },
+  { name: 'PET dot phrase builder', cat: 'PET Tools', desc: 'EHR-ready dot phrase generation for cardiac PET', page: 'pet' },
+  { name: 'ASE guidelines', cat: 'Reference', desc: 'Echo measurement standards, diastology, RV/PA, valvular', page: 'reference' },
+  { name: 'ESC guidelines', cat: 'Reference', desc: 'NSTE-ACS 2020, PH 2022', page: 'reference' },
+  { name: 'AHA/ACC guidelines', cat: 'Reference', desc: 'Valvular 2014/2021, Aortic 2022, HOCM', page: 'reference' },
+  { name: 'ASNC guidelines', cat: 'Reference', desc: 'Cardiac PET coverage policy, SPECT MPI, CPT 78492', page: 'reference' },
+];
+
+searchInput.addEventListener('input', function() {
+  const q = this.value.trim().toLowerCase();
+  if (!q) {
+    searchResultsPage.classList.remove('active');
+    if (pages[currentPage]) pages[currentPage].classList.add('active');
+    navBtns.forEach(b => b.classList.toggle('active', b.dataset.page === currentPage));
+    return;
+  }
+  Object.values(pages).forEach(p => p.classList.remove('active'));
+  navBtns.forEach(b => b.classList.remove('active'));
+  searchResultsPage.classList.add('active');
+
+  const results = searchIndex.filter(item =>
+    item.name.toLowerCase().includes(q) ||
+    item.desc.toLowerCase().includes(q) ||
+    item.cat.toLowerCase().includes(q)
+  );
+
+  document.getElementById('search-heading').textContent = results.length + ' result' + (results.length !== 1 ? 's' : '');
+  document.getElementById('search-sub').textContent = 'for "' + this.value.trim() + '"';
+
+  const list = document.getElementById('search-results-list');
+  if (results.length === 0) {
+    list.innerHTML = '<div class="no-results">No tools or calculators match that search.</div>';
+    return;
+  }
+  list.innerHTML = results.map(r => `
+    <div class="search-result-item" onclick="goToPage('${r.page}')">
+      <div class="sr-name">${r.name}</div>
+      <div class="sr-cat">${r.cat}</div>
+      <div class="sr-desc">${r.desc}</div>
+    </div>
+  `).join('');
+});
+
+function goToPage(key) {
+  searchInput.value = '';
+  showPage(key);
+  if (key === 'calculators') {
+    document.querySelectorAll('.calc-group-body').forEach(b => {
+      b.classList.add('open');
+      b.previousElementSibling.classList.add('open');
+      const chev = b.previousElementSibling.querySelector('.chevron');
+      if (chev) chev.classList.add('open');
+    });
+  }
+}
+</script>
+</body>
+</html>
