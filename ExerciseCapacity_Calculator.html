@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exercise Capacity Calculator — Kligfield &amp; Lauer 2006</title>
+<style>
+/* ── IBM Plex Sans via Google Fonts (loads when online; graceful fallback offline) ── */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #0d1b2a;
+  --surface:  #132236;
+  --surface2: #1a2f47;
+  --border:   #243d5c;
+  --accent:   #38bdf8;
+  --pink:     #f472b6;
+  --text:     #e2eaf4;
+  --muted:    #7a9ab8;
+  --good:     #34d399;
+  --warn:     #fbbf24;
+  --orange:   #fb923c;
+  --danger:   #f87171;
+  --ff-sans:  'IBM Plex Sans', system-ui, sans-serif;
+  --ff-mono:  'IBM Plex Mono', 'Courier New', monospace;
+}
+
+html, body { height: 100%; }
+
+body {
+  font-family: var(--ff-sans);
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ── Header ── */
+.header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 13px 24px;
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  flex-shrink: 0;
+}
+.header h1 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.header .sub {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ── Layout ── */
+.main {
+  display: grid;
+  grid-template-columns: 290px 1fr;
+  flex: 1;
+  min-height: 0;
+}
+
+/* ── Sidebar ── */
+.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 20px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  overflow-y: auto;
+}
+
+.field-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+/* Sex toggle */
+.seg-control {
+  display: flex;
+  background: var(--bg);
+  border-radius: 6px;
+  padding: 3px;
+  gap: 3px;
+}
+.seg-btn {
+  flex: 1;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--ff-sans);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.seg-btn.active {
+  background: var(--surface2);
+  color: var(--text);
+}
+.seg-btn:hover:not(.active) { color: var(--text); }
+
+/* Slider fields */
+.slider-field { display: flex; flex-direction: column; gap: 5px; }
+.slider-val {
+  font-family: var(--ff-mono);
+  font-size: 26px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1;
+}
+.slider-val span { font-size: 13px; font-weight: 400; color: var(--muted); margin-left: 4px; }
+
+input[type="range"] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+  outline: none;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--bg);
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+input[type="range"]::-moz-range-thumb {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--bg);
+  cursor: pointer;
+}
+
+.divider { border: none; border-top: 1px solid var(--border); }
+
+/* Result cards */
+.result-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 13px 15px;
+}
+.result-card .rc-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.result-card .rc-val {
+  font-family: var(--ff-mono);
+  font-size: 30px;
+  font-weight: 500;
+  line-height: 1;
+}
+.result-card .rc-unit {
+  font-size: 14px;
+  color: var(--muted);
+  margin-left: 4px;
+}
+.result-card .rc-sub {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.interp-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 4px;
+  margin-top: 7px;
+}
+.interp-text {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 5px;
+  line-height: 1.5;
+}
+
+/* Formula box */
+.formula-box {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 13px;
+  font-family: var(--ff-mono);
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+.formula-box .hi { color: var(--accent); }
+.formula-box .hi-pink { color: var(--pink); }
+
+/* Reference note */
+.ref-note {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.6;
+  padding-top: 2px;
+}
+.ref-note strong { color: var(--text); font-weight: 500; }
+
+/* ── Chart panel ── */
+.chart-panel {
+  padding: 20px 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: hidden;
+}
+.chart-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+canvas {
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.chart-note {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* ── Legend ── */
+.legend {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.legend-line {
+  width: 22px;
+  height: 2px;
+  border-radius: 1px;
+}
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+/* ── Responsive ── */
+@media (max-width: 760px) {
+  .main { grid-template-columns: 1fr; }
+  .chart-panel { padding: 16px; }
+  .sidebar { border-right: none; border-bottom: 1px solid var(--border); }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Exercise Capacity Calculator</h1>
+  <span class="sub">Kligfield &amp; Lauer · <em>Circulation</em> 2006;114:2162–2169</span>
+</div>
+
+<div class="main">
+
+  <!-- ── Sidebar ── -->
+  <div class="sidebar">
+
+    <div>
+      <div class="field-label">Sex</div>
+      <div class="seg-control">
+        <button class="seg-btn active" id="btn-male"   onclick="setSex('male')">Male</button>
+        <button class="seg-btn"        id="btn-female" onclick="setSex('female')">Female</button>
+      </div>
+    </div>
+
+    <div class="slider-field">
+      <div class="slider-val" id="age-display">55 <span>yr</span></div>
+      <div class="field-label">Age</div>
+      <input type="range" id="age-slider" min="20" max="85" value="55" step="1" oninput="update()">
+    </div>
+
+    <div class="slider-field">
+      <div class="slider-val" id="mets-display">8.0 <span>METs achieved</span></div>
+      <div class="field-label">Achieved METs</div>
+      <input type="range" id="mets-slider" min="1" max="20" value="8" step="0.5" oninput="update()">
+    </div>
+
+    <hr class="divider">
+
+    <div class="result-card">
+      <div class="rc-label">Predicted METs</div>
+      <div class="rc-val" id="pred-val" style="color: var(--accent)">—<span class="rc-unit">METs</span></div>
+      <div class="rc-sub" id="pred-sub">for age / sex</div>
+    </div>
+
+    <div class="result-card">
+      <div class="rc-label">% of Predicted</div>
+      <div class="rc-val" id="pct-val">—<span class="rc-unit">%</span></div>
+      <div id="interp-badge" class="interp-badge">—</div>
+      <div id="interp-text"  class="interp-text">—</div>
+    </div>
+
+    <div class="formula-box" id="formula-box">
+      <span id="formula-line">Predicted = 14.7 − (0.11 × age) — Males</span>
+    </div>
+
+    <div class="ref-note">
+      <strong>Formulas:</strong><br>
+      Men: 14.7 − (0.11 × age)<br>
+      Women: 14.7 − (0.13 × age)<br><br>
+      <strong>Reference:</strong> Kligfield P, Lauer MS. Exercise electrocardiogram testing: beyond the ST segment. <em>Circulation</em> 2006;114:2162–2169.
+    </div>
+
+  </div><!-- /sidebar -->
+
+  <!-- ── Chart panel ── -->
+  <div class="chart-panel">
+    <div class="chart-title">Percentage of Predicted Exercise Capacity for Age</div>
+
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-line" style="background:var(--accent)"></div> Men (100% predicted)
+      </div>
+      <div class="legend-item">
+        <div class="legend-line" style="background:var(--pink)"></div> Women (100% predicted)
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:var(--good); border:2px solid var(--bg)"></div> Patient
+      </div>
+    </div>
+
+    <canvas id="nomogram" width="900" height="520"></canvas>
+
+    <div class="chart-note">
+      Dashed curves show 60 %, 75 %, 85 %, 125 %, and 150 % of predicted for each sex.
+      Shaded zones: <span style="color:var(--orange)">■</span> 60–75 % (reduced) &nbsp;
+      <span style="color:var(--danger)">■</span> &lt;60 % (severely reduced, associated with ↑ CV risk).
+      Patient position shown as colored dot with crosshairs.
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+/* ───────────────────────────────────────────────
+   State
+─────────────────────────────────────────────── */
+let sex = 'male';
+
+function setSex(s) {
+  sex = s;
+  document.getElementById('btn-male').classList.toggle('active', s === 'male');
+  document.getElementById('btn-female').classList.toggle('active', s === 'female');
+  update();
+}
+
+/* ───────────────────────────────────────────────
+   Core formulas (Kligfield / Lauer 2006)
+─────────────────────────────────────────────── */
+function predictedMETs(age, s) {
+  return s === 'male' ? 14.7 - 0.11 * age : 14.7 - 0.13 * age;
+}
+
+function metAtPct(age, s, pct) {
+  return predictedMETs(age, s) * pct / 100;
+}
+
+/* ───────────────────────────────────────────────
+   Interpretation thresholds
+─────────────────────────────────────────────── */
+function getInterp(pct) {
+  if (pct >= 100) return {
+    label: 'Above Predicted',
+    color: '#34d399',
+    bg:    'rgba(52,211,153,0.13)',
+    text:  'Achieved ≥ predicted METs for age and sex.'
+  };
+  if (pct >= 85) return {
+    label: 'Normal',
+    color: '#38bdf8',
+    bg:    'rgba(56,189,248,0.13)',
+    text:  '85–99 % of predicted — within normal range.'
+  };
+  if (pct >= 75) return {
+    label: 'Mildly Reduced',
+    color: '#fbbf24',
+    bg:    'rgba(251,191,36,0.13)',
+    text:  '75–84 % of predicted.'
+  };
+  if (pct >= 60) return {
+    label: 'Reduced',
+    color: '#fb923c',
+    bg:    'rgba(251,146,60,0.13)',
+    text:  '60–74 % of predicted — impaired exercise capacity.'
+  };
+  return {
+    label: 'Severely Reduced',
+    color: '#f87171',
+    bg:    'rgba(248,113,113,0.13)',
+    text:  '< 60 % of predicted — associated with ↑ cardiovascular risk.'
+  };
+}
+
+/* ───────────────────────────────────────────────
+   Update UI
+─────────────────────────────────────────────── */
+function update() {
+  const age      = parseInt(document.getElementById('age-slider').value);
+  const achieved = parseFloat(document.getElementById('mets-slider').value);
+
+  document.getElementById('age-display').innerHTML  = `${age} <span>yr</span>`;
+  document.getElementById('mets-display').innerHTML = `${achieved.toFixed(1)} <span>METs achieved</span>`;
+
+  const pred = predictedMETs(age, sex);
+  const pct  = (achieved / pred) * 100;
+  const interp = getInterp(pct);
+
+  document.getElementById('pred-val').innerHTML =
+    `${pred.toFixed(1)}<span class="rc-unit"> METs</span>`;
+  document.getElementById('pred-sub').textContent =
+    sex === 'male'
+      ? `14.7 − (0.11 × ${age})`
+      : `14.7 − (0.13 × ${age})`;
+
+  document.getElementById('pct-val').innerHTML =
+    `${Math.round(pct)}<span class="rc-unit"> %</span>`;
+
+  const badge = document.getElementById('interp-badge');
+  badge.textContent       = interp.label;
+  badge.style.color       = interp.color;
+  badge.style.background  = interp.bg;
+  badge.style.border      = `1px solid ${interp.color}55`;
+
+  document.getElementById('interp-text').textContent = interp.text;
+
+  document.getElementById('formula-line').innerHTML =
+    sex === 'male'
+      ? `Predicted = 14.7 − (<span style="color:#38bdf8">0.11</span> × age) — Males`
+      : `Predicted = 14.7 − (<span style="color:#f472b6">0.13</span> × age) — Females`;
+
+  drawChart(age, achieved, pct, interp);
+}
+
+/* ───────────────────────────────────────────────
+   Canvas chart
+─────────────────────────────────────────────── */
+function drawChart(patientAge, patientMETs, patientPct, interp) {
+  const canvas = document.getElementById('nomogram');
+  const ctx    = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const PAD = { top: 28, right: 72, bottom: 48, left: 54 };
+  const CW  = W - PAD.left - PAD.right;
+  const CH  = H - PAD.top  - PAD.bottom;
+
+  const AGE_MIN = 20, AGE_MAX = 85;
+  const MET_MIN = 0,  MET_MAX = 15;
+
+  function xp(a) { return PAD.left + (a - AGE_MIN) / (AGE_MAX - AGE_MIN) * CW; }
+  function yp(m) { return PAD.top  + CH - (Math.min(m, MET_MAX) - MET_MIN) / (MET_MAX - MET_MIN) * CH; }
+
+  ctx.clearRect(0, 0, W, H);
+
+  /* Background */
+  ctx.fillStyle = '#132236';
+  ctx.fillRect(0, 0, W, H);
+
+  /* Grid */
+  ctx.strokeStyle = '#1c3350';
+  ctx.lineWidth   = 1;
+  for (let m = 2; m <= MET_MAX; m += 2) {
+    ctx.beginPath(); ctx.moveTo(PAD.left, yp(m)); ctx.lineTo(PAD.left + CW, yp(m)); ctx.stroke();
+  }
+  for (let a = AGE_MIN; a <= AGE_MAX; a += 5) {
+    ctx.beginPath(); ctx.moveTo(xp(a), PAD.top); ctx.lineTo(xp(a), PAD.top + CH); ctx.stroke();
+  }
+
+  /* Shaded zones (use midpoint of male/female for shading) */
+  function shadeZone(pctLo, pctHi, color) {
+    ctx.beginPath();
+    for (let a = AGE_MIN; a <= AGE_MAX; a++) {
+      const mHi = (metAtPct(a, 'male', pctHi) + metAtPct(a, 'female', pctHi)) / 2;
+      const x = xp(a), y = yp(Math.max(0, Math.min(mHi, MET_MAX)));
+      a === AGE_MIN ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    }
+    for (let a = AGE_MAX; a >= AGE_MIN; a--) {
+      const mLo = (metAtPct(a, 'male', pctLo) + metAtPct(a, 'female', pctLo)) / 2;
+      ctx.lineTo(xp(a), yp(Math.max(0, Math.min(mLo, MET_MAX))));
+    }
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+  }
+  shadeZone(60, 75, 'rgba(251,146,60,0.09)');
+  shadeZone(0,  60, 'rgba(248,113,113,0.09)');
+
+  /* Curves */
+  const CURVES = [
+    { s: 'male',   color: '#38bdf8', label: 'Men'   },
+    { s: 'female', color: '#f472b6', label: 'Women' },
+  ];
+  const PCTS = [60, 75, 85, 100, 125, 150];
+
+  CURVES.forEach(({ s, color }) => {
+    PCTS.forEach(pct => {
+      const is100 = pct === 100;
+      ctx.beginPath();
+      ctx.strokeStyle = is100 ? color : color + '60';
+      ctx.lineWidth   = is100 ? 2 : 1;
+      ctx.setLineDash(is100 ? [] : [5, 4]);
+      let first = true;
+      for (let a = AGE_MIN; a <= AGE_MAX; a++) {
+        const m = metAtPct(a, s, pct);
+        if (m < 0 || m > MET_MAX + 1) continue;
+        const x = xp(a), y = yp(Math.min(m, MET_MAX));
+        first ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        first = false;
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      /* % label at right margin */
+      const endM = metAtPct(AGE_MAX, s, pct);
+      if (endM >= 0 && endM <= MET_MAX) {
+        ctx.fillStyle  = is100 ? color : color + '90';
+        ctx.font       = `${is100 ? 11 : 10}px IBM Plex Mono, monospace`;
+        ctx.textAlign  = 'left';
+        ctx.fillText(`${pct}%`, xp(AGE_MAX) + 4, yp(endM) + 4);
+      }
+    });
+
+    /* Sex label near midpoint of 100% line */
+    const labelAge = 38;
+    const labelMet = metAtPct(labelAge, s, 100);
+    if (labelMet > 0 && labelMet <= MET_MAX) {
+      ctx.fillStyle  = color;
+      ctx.font       = '600 12px IBM Plex Sans, sans-serif';
+      ctx.textAlign  = 'center';
+      ctx.fillText(s === 'male' ? 'Men' : 'Women', xp(labelAge), yp(labelMet) - 9);
+    }
+  });
+
+  /* Axes */
+  ctx.strokeStyle = '#3a5a7a';
+  ctx.lineWidth   = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(PAD.left, PAD.top); ctx.lineTo(PAD.left, PAD.top + CH);
+  ctx.lineTo(PAD.left + CW, PAD.top + CH);
+  ctx.stroke();
+
+  /* Y-axis labels */
+  ctx.fillStyle  = '#7a9ab8';
+  ctx.font       = '11px IBM Plex Mono, monospace';
+  ctx.textAlign  = 'right';
+  for (let m = 2; m <= MET_MAX; m += 2) {
+    ctx.fillText(m, PAD.left - 8, yp(m) + 4);
+  }
+
+  /* Y-axis title */
+  ctx.save();
+  ctx.translate(14, PAD.top + CH / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.textAlign = 'center';
+  ctx.font      = '12px IBM Plex Sans, sans-serif';
+  ctx.fillText('METs', 0, 0);
+  ctx.restore();
+
+  /* X-axis labels */
+  ctx.textAlign = 'center';
+  ctx.font      = '11px IBM Plex Mono, monospace';
+  for (let a = AGE_MIN; a <= AGE_MAX; a += 5) {
+    ctx.fillText(a, xp(a), PAD.top + CH + 16);
+  }
+  ctx.font = '12px IBM Plex Sans, sans-serif';
+  ctx.fillText('Age (years)', PAD.left + CW / 2, H - 8);
+
+  /* Patient marker */
+  if (patientAge >= AGE_MIN && patientAge <= AGE_MAX
+      && patientMETs >= 0 && patientMETs <= MET_MAX + 2) {
+
+    const px = xp(patientAge);
+    const py = yp(Math.min(patientMETs, MET_MAX));
+
+    /* Crosshairs */
+    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+    ctx.lineWidth   = 1;
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath(); ctx.moveTo(PAD.left, py); ctx.lineTo(px, py); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(px, PAD.top + CH); ctx.lineTo(px, py); ctx.stroke();
+    ctx.setLineDash([]);
+
+    /* Glow */
+    const grad = ctx.createRadialGradient(px, py, 0, px, py, 20);
+    grad.addColorStop(0, interp.color + '55');
+    grad.addColorStop(1, 'transparent');
+    ctx.fillStyle = grad;
+    ctx.beginPath(); ctx.arc(px, py, 20, 0, Math.PI * 2); ctx.fill();
+
+    /* Dot */
+    ctx.fillStyle   = interp.color;
+    ctx.strokeStyle = '#0d1b2a';
+    ctx.lineWidth   = 2.5;
+    ctx.beginPath();
+    ctx.arc(px, py, 7, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    /* Callout label */
+    const labelText = `${patientMETs.toFixed(1)} METs  (${Math.round(patientPct)}%)`;
+    ctx.font      = '600 12px IBM Plex Sans, sans-serif';
+    ctx.fillStyle = interp.color;
+    ctx.textAlign = px > PAD.left + CW * 0.65 ? 'right' : 'left';
+    const lx = px > PAD.left + CW * 0.65 ? px - 12 : px + 12;
+    ctx.fillText(labelText, lx, py - 11);
+  }
+}
+
+/* ───────────────────────────────────────────────
+   Responsive canvas resize
+─────────────────────────────────────────────── */
+function resizeCanvas() {
+  const canvas = document.getElementById('nomogram');
+  const panel  = canvas.parentElement;
+  const w      = panel.clientWidth - 48; // account for panel padding
+  if (w < 200) return;
+  canvas.width  = w;
+  canvas.height = Math.round(w * 0.578);
+  update();
+}
+
+window.addEventListener('resize', resizeCanvas);
+
+/* Init */
+window.addEventListener('DOMContentLoaded', () => {
+  resizeCanvas();
+  update();
+});
+</script>
+</body>
+</html>
