@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aortic Calculator — UMMC Cardiovascular Imaging</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:        #0d1b2a;
+  --surface:   #162032;
+  --surface2:  #1c2d42;
+  --border:    #1e3a5f;
+  --accent:    #0ea5e9;
+  --accent2:   #06b6d4;
+  --text:      #e8f0f8;
+  --muted:     #7a95b0;
+  --ok:        #10b981;
+  --warn:      #f59e0b;
+  --danger:    #ef4444;
+  --ok-bg:     #052e1a;
+  --warn-bg:   #2d1d00;
+  --danger-bg: #2a0a0a;
+  --info-bg:   #0a1f38;
+  --radius:    10px;
+  --shadow:    0 4px 24px rgba(0,0,0,.45);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'IBM Plex Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 14px;
+}
+
+/* ── HEADER ─────────────────────────────── */
+#header {
+  background: #0a1520;
+  border-bottom: 1px solid var(--border);
+  padding: 16px 24px 14px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+#header .brand {
+  font-family: 'Sora', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: .02em;
+}
+#header .brand-sub {
+  font-size: 11.5px;
+  color: var(--muted);
+  margin-top: 3px;
+}
+#header .version {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10.5px;
+  color: var(--muted);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 3px 10px;
+  white-space: nowrap;
+}
+
+/* ── LAYOUT ─────────────────────────────── */
+.page { padding: 24px 20px 60px; max-width: 980px; margin: 0 auto; }
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(430px, 1fr)); gap: 20px; }
+
+/* ── SECTION HEADING ────────────────────── */
+.sec-hd {
+  font-family: 'Sora', sans-serif;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--muted);
+  margin: 28px 0 14px;
+}
+.sec-hd:first-child { margin-top: 4px; }
+
+/* ── CARD ───────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px 22px 20px;
+  box-shadow: var(--shadow);
+}
+.card-hd {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 13px;
+}
+.card-hd .icon { font-size: 20px; }
+.card-hd h2 {
+  font-family: 'Sora', sans-serif;
+  font-size: 15px; font-weight: 600;
+}
+.card-hd .sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+/* ── EQUATION ───────────────────────────── */
+.eq {
+  background: var(--info-bg);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11.5px;
+  color: var(--accent2);
+  line-height: 1.65;
+  white-space: pre-line;
+}
+
+/* ── FORM ───────────────────────────────── */
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+.form-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.form-row.cols-1 { grid-template-columns: 1fr; }
+.fg { display: flex; flex-direction: column; gap: 5px; }
+.fg label { font-size: 11.5px; color: var(--muted); font-weight: 500; }
+.fg input, .fg select {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  padding: 8px 10px;
+  transition: border-color .15s;
+  width: 100%;
+}
+.fg input:focus, .fg select:focus { outline: none; border-color: var(--accent); }
+.fg select option { background: var(--surface2); }
+
+/* ── RESULT GRID ────────────────────────── */
+.result-grid {
+  display: none;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 10px;
+  margin: 14px 0;
+}
+.result-grid.visible { display: grid; }
+.result-item {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 10px;
+  text-align: center;
+}
+.result-item .rv {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 22px; font-weight: 500;
+  color: var(--accent);
+}
+.result-item .ru { font-size: 10px; color: var(--muted); margin-top: 2px; }
+.result-item .rl { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+/* ── SUB-LABEL ──────────────────────────── */
+.sub-lbl {
+  margin: 14px 0 4px;
+  font-size: 10.5px;
+  color: var(--muted);
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+/* ── INTERP ─────────────────────────────── */
+.interp {
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin-top: 10px;
+  font-size: 12.5px; font-weight: 500;
+  display: none;
+}
+.interp.ok     { background: var(--ok-bg);     color: var(--ok);     border: 1px solid #0e4a2e; }
+.interp.warn   { background: var(--warn-bg);   color: var(--warn);   border: 1px solid #5a3a00; }
+.interp.danger { background: var(--danger-bg); color: var(--danger); border: 1px solid #5a1a1a; }
+
+/* ── NOTE ───────────────────────────────── */
+.note {
+  margin-top: 14px;
+  font-size: 11.5px;
+  color: var(--muted);
+  line-height: 1.65;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+.note strong { color: var(--text); }
+
+/* ── TABLE ──────────────────────────────── */
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+thead tr { border-bottom: 1px solid var(--border); }
+th { text-align: left; padding: 8px 6px; color: var(--muted); font-weight: 500; }
+th:not(:first-child) { text-align: center; }
+td { padding: 8px 6px; border-bottom: 1px solid var(--border); }
+td:not(:first-child) { text-align: center; }
+tbody tr:last-child td { border-bottom: none; }
+
+/* ── FOOTER ─────────────────────────────── */
+#footer {
+  text-align: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  padding: 20px;
+  border-top: 1px solid var(--border);
+  margin-top: 20px;
+}
+
+@media(max-width:600px) {
+  .form-row, .form-row.cols-3 { grid-template-columns: 1fr 1fr; }
+  .grid-2 { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div>
+    <div class="brand">🫀 Aortic Dimension Calculator</div>
+    <div class="brand-sub">UMMC Cardiovascular Imaging · Ascending Aorta &amp; Aortic Root</div>
+  </div>
+  <div class="version">v1.1 · 2026-08-03</div>
+</div>
+
+<div class="page">
+
+  <!-- ═══ ASCENDING AORTA ═══════════════════════════════════════════════ -->
+  <div class="sec-hd">Ascending Aorta — Yale Model</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-hd">
+        <span class="icon">📏</span>
+        <div><h2>Ascending Aorta</h2><div class="sub">Davies et al. Yale model (J Thorac Cardiovasc Surg 2006)</div></div>
+      </div>
+      <div class="form-row">
+        <div class="fg">
+          <label>Age (years)</label>
+          <input type="number" id="ascAge" step="1" min="18" max="100" placeholder="e.g. 59" oninput="calcAscAorta()">
+        </div>
+        <div class="fg">
+          <label>Sex</label>
+          <select id="ascSex" onchange="calcAscAorta()">
+            <option value="M">Male</option>
+            <option value="F">Female</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="fg">
+          <label>Height (cm)</label>
+          <input type="number" id="ascHt" step="0.5" min="100" placeholder="e.g. 178" oninput="calcAscAorta()">
+        </div>
+        <div class="fg">
+          <label>Weight (kg)</label>
+          <input type="number" id="ascWt" step="0.5" min="30" placeholder="e.g. 85" oninput="calcAscAorta()">
+        </div>
+      </div>
+      <div class="form-row cols-1">
+        <div class="fg">
+          <label>Ascending Aorta Diameter (mm)</label>
+          <input type="number" id="ascDiam" step="0.5" min="0" placeholder="e.g. 41" oninput="calcAscAorta()">
+        </div>
+      </div>
+      <div class="result-grid" id="ascGrid">
+        <div class="result-item"><div class="rv" id="ascBSA">—</div><div class="ru">m²</div><div class="rl">BSA</div></div>
+        <div class="result-item"><div class="rv" id="ascExp">—</div><div class="ru">mm</div><div class="rl">Expected</div></div>
+        <div class="result-item"><div class="rv" id="ascFold">—</div><div class="ru">×</div><div class="rl">Fold ↑</div></div>
+        <div class="result-item"><div class="rv" id="ascZ">—</div><div class="ru">SD</div><div class="rl">Z-score</div></div>
+      </div>
+      <div class="interp" id="ascInterp"></div>
+      <div class="note">
+        <strong>Classification:</strong> Normal (Z &lt;2) · Ectasia (Z 2–3 or 1.0–1.5× expected) · Aneurysm (Z &gt;3 or &gt;1.5× expected).<br>
+        Surgical threshold typically ≥5.5 cm; ≥5.0 cm with bicuspid AV or connective tissue disorder (2022 ACC/AHA). Confirm all interventional decisions with CT/MRA.
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ AORTIC ROOT ════════════════════════════════════════════════════ -->
+  <div class="sec-hd">Aortic Root — Sinuses of Valsalva</div>
+  <div class="grid-2">
+
+    <!-- Root calculator -->
+    <div class="card">
+      <div class="card-hd">
+        <span class="icon">⭕</span>
+        <div><h2>Aortic Root</h2><div class="sub">Devereux et al. (Am J Cardiol 2012;110:1189–1194) · Age-, sex-, BSA-adjusted</div></div>
+      </div>
+      <div class="eq">BSA model:  Expected (cm) = 2.423 + (Age_dec × 0.090) + (BSA × 0.461) − 0.267♂ / −0.534♀
+SEE = 0.261 cm
+
+Height model:  Expected (cm) = 1.519 + (Age_dec × 0.10) + (Ht_cm × 0.010) − 0.247♂ / −0.494♀
+SEE = 0.215 cm</div>
+      <div class="form-row cols-3">
+        <div class="fg">
+          <label>Sex</label>
+          <select id="rootSex" onchange="calcAorticRoot()">
+            <option value="M">Male</option>
+            <option value="F">Female</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Age (years)</label>
+          <input type="number" id="rootAge" step="1" min="15" max="100" placeholder="e.g. 52" oninput="calcAorticRoot()">
+        </div>
+        <div class="fg">
+          <label>BSA (m²)</label>
+          <input type="number" id="rootBSA" step="0.01" min="0" placeholder="e.g. 1.95" oninput="calcAorticRoot()">
+        </div>
+      </div>
+      <div class="form-row cols-3">
+        <div class="fg">
+          <label>Height (cm)</label>
+          <input type="number" id="rootHt" step="0.5" min="100" placeholder="e.g. 175" oninput="calcRootBSA()">
+        </div>
+        <div class="fg">
+          <label>Weight (kg)</label>
+          <input type="number" id="rootWt" step="0.5" min="30" placeholder="e.g. 80" oninput="calcRootBSA()">
+        </div>
+        <div class="fg">
+          <label>Root Diameter — SoV (mm)</label>
+          <input type="number" id="rootDiam" step="0.5" min="0" placeholder="e.g. 38" oninput="calcAorticRoot()">
+        </div>
+      </div>
+
+      <div class="sub-lbl">BSA-Based Model (primary)</div>
+      <div class="result-grid" id="rootGrid">
+        <div class="result-item"><div class="rv" id="rootExpBSA">—</div><div class="ru">mm</div><div class="rl">Expected</div></div>
+        <div class="result-item"><div class="rv" id="rootZBSA">—</div><div class="ru">SD</div><div class="rl">Z-score</div></div>
+        <div class="result-item"><div class="rv" id="rootIdx">—</div><div class="ru">cm/m²</div><div class="rl">Indexed</div></div>
+      </div>
+
+      <div class="sub-lbl">Height-Based Model (alternative · requires ht input)</div>
+      <div class="result-grid" id="rootGridHt">
+        <div class="result-item"><div class="rv" id="rootExpHt">—</div><div class="ru">mm</div><div class="rl">Expected</div></div>
+        <div class="result-item"><div class="rv" id="rootZHt">—</div><div class="ru">SD</div><div class="rl">Z-score</div></div>
+      </div>
+
+      <div class="interp" id="rootInterp"></div>
+      <div class="note">
+        <strong>Severity (Devereux 2012 / Lang ASE 2005):</strong><br>
+        Z &lt;1.96 = Normal · Z 1.97–3.0 = Mild dilatation · Z 3.01–4.0 = Moderate · Z &gt;4.0 = Severe.<br>
+        Indexed: normal ≤2.1 cm/m² (≤1.8 cm/m² in smaller habitus).<br>
+        Surgical thresholds (2022 ACC/AHA): ≥50 mm general · ≥45 mm bicuspid AV / connective tissue disorder.<br><br>
+        <strong>Measurement method:</strong> End-diastole, leading-edge convention, maximum width parallel to the aortic annular plane (parasternal or apical long-axis). BSA by DuBois formula.<br>
+        <strong>Reference:</strong> Devereux RB, de Simone G, et al. Am J Cardiol 2012;110:1189–1194. n=1,207, age ≥15 yr, multiethnic (NY, Strong Heart, FBPP, HyperGEN cohorts). R=0.674, SEE=0.261 cm (BSA model).
+      </div>
+    </div>
+
+    <!-- Indexed dimensions reference + BSA quick calc -->
+    <div class="card">
+      <div class="card-hd">
+        <span class="icon">📊</span>
+        <div><h2>Indexed Aortic Dimensions</h2><div class="sub">ASE / ACC/AHA adult reference thresholds</div></div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Segment</th>
+              <th style="text-align:center">Normal (mm)</th>
+              <th style="text-align:center">Indexed (cm/m²)</th>
+              <th style="text-align:center">Aneurysm</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Annulus</td><td>18–26</td><td>—</td><td>—</td></tr>
+            <tr><td>Root (sinuses)</td><td>♂≤40 / ♀≤37</td><td>≤2.1</td><td>≥50 mm</td></tr>
+            <tr><td>STJ</td><td>≤40</td><td>≤2.1</td><td>≥50 mm</td></tr>
+            <tr><td>Ascending</td><td>≤38</td><td>≤2.1</td><td>≥50 mm</td></tr>
+            <tr><td>Descending</td><td>≤28</td><td>≤1.6</td><td>≥40 mm</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note" style="margin-top:16px;">
+        <strong>BSA Quick Calculator</strong> (DuBois formula)
+        <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">
+          <div class="fg" style="flex:1;min-width:90px;">
+            <label>Ht (cm)</label>
+            <input type="number" id="bsaHt" step="0.5" placeholder="175" oninput="calcQuickBSA()">
+          </div>
+          <div class="fg" style="flex:1;min-width:90px;">
+            <label>Wt (kg)</label>
+            <input type="number" id="bsaWt" step="0.5" placeholder="80" oninput="calcQuickBSA()">
+          </div>
+          <div class="fg" style="flex:1;min-width:90px;">
+            <label>BSA (m²)</label>
+            <input type="number" id="bsaOut" readonly style="background:var(--surface);cursor:default;">
+          </div>
+        </div>
+        <div style="margin-top:12px;">
+          <strong>Surgical thresholds (2022 ACC/AHA):</strong><br>
+          Ascending ≥5.5 cm (general) · ≥5.0 cm (bicuspid AV or CTD).<br>
+          Root (sinuses) ≥5.0 cm general · ≥4.5 cm bicuspid AV / CTD / family hx dissection.<br>
+          All decisions require cross-sectional imaging (CT/MRA) confirmation.
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /grid-2 -->
+</div><!-- /page -->
+
+<div id="footer">
+  UMMC Cardiovascular Imaging · Aortic Dimension Calculator · v1.1 · 2026-08-03 ·
+  For clinical decision support only — not a substitute for physician judgment or cross-sectional imaging.
+</div>
+
+<script>
+/* ── HELPERS ─────────────────────────────── */
+function calcBSA(ht, wt) {
+  return 0.007184 * Math.pow(ht, 0.725) * Math.pow(wt, 0.425);
+}
+function showGrid(id)  { document.getElementById(id).classList.add('visible'); }
+function hideGrid(id)  { document.getElementById(id).classList.remove('visible'); }
+function showInterp(id, cls, text) {
+  const el = document.getElementById(id);
+  el.className = 'interp ' + cls;
+  el.textContent = text;
+  el.style.display = 'block';
+}
+function hideInterp(id) {
+  document.getElementById(id).style.display = 'none';
+}
+
+/* ── ASCENDING AORTA (YALE) ─────────────── */
+function calcAscAorta() {
+  const age  = parseFloat(document.getElementById('ascAge').value);
+  const sex  = document.getElementById('ascSex').value;
+  const ht   = parseFloat(document.getElementById('ascHt').value);
+  const wt   = parseFloat(document.getElementById('ascWt').value);
+  const diam = parseFloat(document.getElementById('ascDiam').value);
+  if (isNaN(age) || isNaN(ht) || isNaN(wt) || isNaN(diam)) {
+    hideGrid('ascGrid'); hideInterp('ascInterp'); return;
+  }
+  const bsa = calcBSA(ht, wt);
+  // Davies et al. JTCVS 2006 — age- and BSA-stratified coefficients
+  let exp, sd;
+  if (sex === 'M') {
+    if      (age < 40) { exp = 21.5 + 5.5 * bsa; sd = 3.0; }
+    else if (age < 60) { exp = 22.5 + 6.0 * bsa; sd = 3.3; }
+    else               { exp = 24.0 + 6.0 * bsa; sd = 3.5; }
+  } else {
+    if      (age < 40) { exp = 19.5 + 5.0 * bsa; sd = 2.8; }
+    else if (age < 60) { exp = 20.5 + 5.5 * bsa; sd = 3.0; }
+    else               { exp = 22.0 + 5.5 * bsa; sd = 3.2; }
+  }
+  const fold = diam / exp;
+  const z    = (diam - exp) / sd;
+  document.getElementById('ascBSA').textContent  = bsa.toFixed(2);
+  document.getElementById('ascExp').textContent  = exp.toFixed(1);
+  document.getElementById('ascFold').textContent = fold.toFixed(2);
+  document.getElementById('ascZ').textContent    = z.toFixed(2);
+  showGrid('ascGrid');
+  if (z < 2)
+    showInterp('ascInterp','ok',`✓ Normal ascending aorta (Z ${z.toFixed(2)} · fold ${fold.toFixed(2)}×)`);
+  else if (z < 3)
+    showInterp('ascInterp','warn',`⚠ Aortic ectasia (Z ${z.toFixed(2)} · fold ${fold.toFixed(2)}×) — serial surveillance recommended`);
+  else
+    showInterp('ascInterp','danger',`✖ Aortic aneurysm (Z ${z.toFixed(2)} · fold ${fold.toFixed(2)}×) — surgical evaluation`);
+}
+
+/* ── AORTIC ROOT (DEVEREUX 2012) ─────────── */
+/*
+   Table 1 — Devereux RB et al. Am J Cardiol 2012;110:1189-1194
+   Sinuses of Valsalva, end-diastole, leading-edge convention.
+
+   BSA model:    Expected (cm) = 2.423 + (age_dec × 0.090) + (BSA × 0.461) + gender_offset
+                 Male = −0.267   Female = −0.534    SEE = 0.261 cm
+
+   Height model: Expected (cm) = 1.519 + (age_dec × 0.10)  + (ht_cm × 0.010) + gender_offset
+                 Male = −0.247   Female = −0.494    SEE = 0.215 cm
+
+   Severity (Lang ASE 2005 / Devereux 2012):
+     Z < 1.96            Normal
+     Z 1.97 – 3.0        Mild dilatation
+     Z 3.01 – 4.0        Moderate dilatation
+     Z > 4.0             Severe dilatation
+*/
+function calcRootBSA() {
+  const ht = parseFloat(document.getElementById('rootHt').value);
+  const wt = parseFloat(document.getElementById('rootWt').value);
+  if (!isNaN(ht) && !isNaN(wt))
+    document.getElementById('rootBSA').value = calcBSA(ht, wt).toFixed(2);
+  calcAorticRoot();
+}
+
+function calcAorticRoot() {
+  const sex  = document.getElementById('rootSex').value;
+  const age  = parseFloat(document.getElementById('rootAge').value);
+  const bsa  = parseFloat(document.getElementById('rootBSA').value);
+  const ht   = parseFloat(document.getElementById('rootHt').value);
+  const diam = parseFloat(document.getElementById('rootDiam').value);
+  const diamCm = diam / 10;
+
+  const gOff_BSA = sex === 'M' ? -0.267 : -0.534;
+  const gOff_Ht  = sex === 'M' ? -0.247 : -0.494;
+
+  // ── BSA model ────────────────────────────
+  if (!isNaN(age) && !isNaN(bsa) && !isNaN(diam) && bsa > 0 && age > 0) {
+    const ageDec  = age / 10;
+    const expBSA  = 2.423 + (ageDec * 0.090) + (bsa * 0.461) + gOff_BSA;
+    const seeBSA  = 0.261;
+    const zBSA    = (diamCm - expBSA) / seeBSA;
+    const idx     = diamCm / bsa;
+
+    document.getElementById('rootExpBSA').textContent = (expBSA * 10).toFixed(1);
+    document.getElementById('rootZBSA').textContent   = zBSA.toFixed(2);
+    document.getElementById('rootIdx').textContent    = idx.toFixed(2);
+    showGrid('rootGrid');
+
+    // Severity badge uses primary BSA Z-score
+    const zl  = zBSA.toFixed(2);
+    const mms = diam.toFixed(0) + ' mm';
+    if (zBSA < 1.96)
+      showInterp('rootInterp','ok',`✓ Normal aortic root (Z ${zl}) · Indexed ${idx.toFixed(2)} cm/m²`);
+    else if (zBSA <= 3.0)
+      showInterp('rootInterp','warn',`⚠ Mild dilatation (Z ${zl} · ${mms}) — serial surveillance q1–2 yr`);
+    else if (zBSA <= 4.0)
+      showInterp('rootInterp','danger',`✖ Moderate dilatation (Z ${zl} · ${mms}) — cardiothoracic surgery referral`);
+    else
+      showInterp('rootInterp','danger',`✖ Severe dilatation (Z ${zl} · ${mms}) — urgent surgical evaluation`);
+  } else {
+    hideGrid('rootGrid');
+    hideInterp('rootInterp');
+  }
+
+  // ── Height model ──────────────────────────
+  if (!isNaN(age) && !isNaN(ht) && !isNaN(diam) && ht > 0 && age > 0) {
+    const ageDec = age / 10;
+    const expHt  = 1.519 + (ageDec * 0.10) + (ht * 0.010) + gOff_Ht;
+    const seeHt  = 0.215;
+    const zHt    = (diamCm - expHt) / seeHt;
+    document.getElementById('rootExpHt').textContent = (expHt * 10).toFixed(1);
+    document.getElementById('rootZHt').textContent   = zHt.toFixed(2);
+    showGrid('rootGridHt');
+  } else {
+    hideGrid('rootGridHt');
+  }
+}
+
+/* ── QUICK BSA ───────────────────────────── */
+function calcQuickBSA() {
+  const ht = parseFloat(document.getElementById('bsaHt').value);
+  const wt = parseFloat(document.getElementById('bsaWt').value);
+  if (!isNaN(ht) && !isNaN(wt))
+    document.getElementById('bsaOut').value = calcBSA(ht, wt).toFixed(2);
+}
+</script>
+</body>
+</html>
