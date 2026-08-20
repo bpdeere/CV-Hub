@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cardiac PET Dot Phrase Builder</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f4f6f9;--panel:#fff;--border:#e2e6ea;--border2:#ced4da;
+  --text:#1a2332;--text2:#4a5568;--text3:#8a96a3;
+  --blue:#1a56db;--blue-bg:#eff6ff;--blue-border:#bfdbfe;--blue-text:#1e40af;
+  --green:#0f7a4f;--green-bg:#f0fdf4;--green-border:#a7f3d0;
+  --amber:#b45309;--amber-bg:#fffbeb;--amber-border:#fcd34d;
+  --red:#b91c1c;--red-bg:#fef2f2;--red-border:#fecaca;
+  --orange:#c2410c;--orange-bg:#fff7ed;
+  --purple:#6d28d9;--purple-bg:#f5f3ff;
+  --radius:8px;--font:-apple-system,"Segoe UI",system-ui,sans-serif;--mono:"SF Mono","Fira Code",Consolas,monospace;
+}
+html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
+#root{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+.hdr{background:var(--panel);border-bottom:1px solid var(--border);padding:11px 20px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.hdr-title{font-size:15px;font-weight:600}
+.hdr-sub{font-size:11px;color:var(--text3)}
+.hdr-badge{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:700;background:var(--blue-bg);color:var(--blue-text);border:1px solid var(--blue-border);letter-spacing:.04em;flex-shrink:0}
+.body{display:flex;flex:1;overflow:hidden}
+/* sidebar */
+.sb{width:260px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--border);overflow-y:auto}
+.sb-sec-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);padding:10px 14px 3px}
+.sc-btn{display:block;width:100%;text-align:left;padding:7px 14px 8px;border:none;background:transparent;cursor:pointer;border-left:3px solid transparent;transition:background .1s}
+.sc-btn:hover{background:var(--bg)}
+.sc-btn.act{background:var(--blue-bg);border-left-color:var(--blue)}
+.sc-code{font-size:11px;font-weight:700;color:var(--blue);font-family:var(--mono)}
+.sc-name{font-size:12px;color:var(--text2);line-height:1.3;margin-top:1px}
+.sc-btn.act .sc-name{color:var(--text)}
+.sc-tag{display:inline-block;font-size:9px;padding:1px 5px;border-radius:3px;margin-top:3px;font-weight:700}
+.tag-n{background:var(--green-bg);color:var(--green)}
+.tag-a{background:var(--red-bg);color:var(--red)}
+.tag-m{background:var(--amber-bg);color:var(--amber)}
+/* form */
+.fp{width:360px;flex-shrink:0;border-right:1px solid var(--border);overflow-y:auto;background:var(--panel)}
+.fp-head{padding:13px 16px 10px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--panel);z-index:1}
+.fp-code{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--blue)}
+.fp-title{font-size:13px;font-weight:500;color:var(--text);margin-top:2px}
+.fp-when{font-size:11px;color:var(--text3);margin-top:4px;font-style:italic;line-height:1.4}
+.fp-body{padding:14px 16px 40px}
+.fg{margin-bottom:16px}
+.fg-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:7px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+.fld{margin-bottom:9px}
+.fld label{display:block;font-size:12px;color:var(--text2);margin-bottom:3px;font-weight:500}
+.fld input,.fld select{font-family:var(--font);font-size:13px;color:var(--text);background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius);padding:6px 10px;width:100%;transition:border-color .15s}
+.fld input:focus,.fld select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,86,219,.12)}
+.chk-row{display:flex;align-items:flex-start;gap:8px;padding:7px 10px;border-radius:var(--radius);border:1px solid var(--border);background:var(--bg);margin-bottom:7px;cursor:pointer}
+.chk-row input[type=checkbox]{margin-top:3px;flex-shrink:0;cursor:pointer}
+.chk-lbl{font-size:12px;color:var(--text2);line-height:1.4}
+.chk-lbl b{color:var(--text);display:block}
+.seg-tog{display:flex;gap:5px;flex-wrap:wrap}
+.seg-b{padding:4px 11px;border-radius:20px;border:1px solid var(--border2);background:var(--bg);color:var(--text2);font-size:12px;cursor:pointer;font-family:var(--font);transition:all .1s}
+.seg-b.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+/* preview */
+.pv{flex:1;overflow-y:auto;background:var(--bg)}
+.pv-head{padding:13px 20px 10px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:1;display:flex;justify-content:space-between;align-items:center}
+.pv-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3)}
+.btn{padding:6px 14px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--panel);color:var(--text);font-size:12px;cursor:pointer;font-family:var(--font);font-weight:500}
+.btn-p{background:var(--blue);color:#fff;border-color:var(--blue)}
+.btn-p:hover{background:#1446b5}
+.pv-body{padding:20px}
+.pv-box{background:var(--panel);border-radius:12px;border:1px solid var(--border);padding:24px 28px;max-width:720px}
+.risk-low{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);padding:9px 14px;border-radius:var(--radius);font-size:12px;font-weight:500;margin-bottom:16px}
+.risk-int{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border);padding:9px 14px;border-radius:var(--radius);font-size:12px;font-weight:500;margin-bottom:16px}
+.risk-hi{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border);padding:9px 14px;border-radius:var(--radius);font-size:12px;font-weight:500;margin-bottom:16px}
+.sec-ttl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--border)}
+.pv-line{display:flex;gap:10px;margin-bottom:10px;font-size:13px;line-height:1.75}
+.pv-num{font-weight:700;color:var(--text3);flex-shrink:0;min-width:18px}
+.pv-txt{color:var(--text)}
+.blank{color:#a0aec0;font-style:italic;background:#f7f8fa;padding:0 3px;border-radius:3px;font-size:12px}
+.hr-txt{color:var(--red);font-weight:500}
+.pv-foot{margin-top:16px;padding-top:12px;border-top:1px solid var(--border);font-size:11px;color:var(--text3)}
+.pv-solo{font-size:13px;line-height:1.8;color:var(--text)}
+.empty{text-align:center;padding:60px 20px;color:var(--text3)}
+.empty-icon{font-size:44px;margin-bottom:10px;opacity:.4}
+.toast{position:fixed;bottom:24px;right:24px;padding:10px 18px;border-radius:var(--radius);background:#1a2332;color:#fff;font-size:13px;font-weight:500;opacity:0;transition:opacity .2s;pointer-events:none;z-index:999}
+.toast.on{opacity:1}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<div class="toast" id="toast">Copied ✓</div>
+<script>
+const {useState, createElement:h} = React;
+
+// ── DATA ──────────────────────────────────────────────────────────
+
+const P = [
+{id:'n1',code:'.CPETNORMAL',section:'Normal',title:'Normal — All Elements Normal',tag:'n',
+ when:'Normal perfusion, normal MBFR, normal LVEF reserve, no CAC.',risk:'low',
+ groups:[
+  {g:'MBF / MBFR',fs:[
+    {id:'mbfr',l:'Global MBFR',t:'num',ph:'e.g. 3.4'}]},
+  {g:'LV Function',fs:[
+    {id:'rEF',l:'Rest LVEF (%)',t:'num',ph:'e.g. 61'},
+    {id:'sEF',l:'Stress LVEF (%)',t:'num',ph:'e.g. 72'}]},
+  {g:'ECG & Stress',fs:[
+    {id:'agent',l:'Stress agent',t:'sel',opts:['regadenoson','adenosine','dipyridamole']},
+    {id:'ecg',l:'ECG response',t:'sel',opts:['No ischemic ECG changes','Nonischemic ECG response','Stress ECG negative for ischemia']}]},
+  {g:'Coronary Calcium',fs:[
+    {id:'cac',l:'CAC / CT',t:'sel',opts:['No coronary artery calcification identified on attenuation-correction CT','Mild coronary artery calcification identified','Moderate coronary artery calcification identified','Severe coronary artery calcification identified']}]},
+  {g:'Comparison',fs:[
+    {id:'prior',l:'Prior study',t:'sel',opts:['No prior cardiac PET study available for comparison','No significant change compared to prior study']}]},
+ ],
+ render:(f)=>[
+  {n:1,t:'Normal study. PET myocardial perfusion images are normal at rest and with stress, with no evidence of vasodilator-induced myocardial ischemia.'},
+  {n:2,t:`Normal global myocardial blood flow reserve (MBFR = ${f.mbfr||'___'}) confirming study normalcy and predicting a low risk for major coronary-related events beyond normal perfusion.`},
+  {n:3,t:`Normal left ventricular size and systolic function. Rest LVEF ${f.rEF||'___'}%, stress LVEF ${f.sEF||'___'}%. Normal wall motion throughout.`},
+  {n:4,t:`${f.ecg||'No ischemic ECG changes'} during pharmacologic stress with ${f.agent||'regadenoson'}.`},
+  {n:5,t:`${f.cac||'No coronary artery calcification identified on attenuation-correction CT'}.`},
+  {n:6,t:`${f.prior||'No prior cardiac PET study available for comparison'}.`},
+ ]},
+
+{id:'n2',code:'.CPETNORMALMBF',section:'Normal',title:'Normal — MBF Not Reported',tag:'n',
+ when:'Normal static images but MBF quantification technically inadequate or not performed.',risk:'low',
+ groups:[
+  {g:'MBF Limitation',fs:[
+    {id:'reason',l:'Reason MBF not reported',t:'sel',opts:['technical factors affecting accuracy','technically inadequate tracer injection profile','severe patient motion during dynamic acquisition','end-stage renal disease (ESRD)','patient-specific concerns affecting accuracy']}]},
+  {g:'LV Function',fs:[
+    {id:'rEF',l:'Rest LVEF (%)',t:'num',ph:'e.g. 62'},
+    {id:'sEF',l:'Stress LVEF (%)',t:'num',ph:'e.g. 70'}]},
+  {g:'ECG & Stress',fs:[
+    {id:'agent',l:'Stress agent',t:'sel',opts:['regadenoson','adenosine']},
+    {id:'ecg',l:'ECG response',t:'sel',opts:['No ischemic ECG changes','Nonischemic ECG response']}]},
+  {g:'Coronary Calcium',fs:[
+    {id:'cac',l:'CAC / CT',t:'sel',opts:['No coronary artery calcification','Mild coronary artery calcification','Moderate coronary artery calcification','Severe coronary artery calcification']}]},
+ ],
+ render:(f)=>[
+  {n:1,t:'Normal study. PET myocardial perfusion images are normal at rest and with stress, with no evidence of vasodilator-induced myocardial ischemia.'},
+  {n:2,t:`Myocardial blood flow reserve is not reported in this patient due to ${f.reason||'technical factors'} that may affect accuracy and could lead to inappropriate clinical decisions.`},
+  {n:3,t:`Normal left ventricular size and systolic function. Rest LVEF ${f.rEF||'___'}%, stress LVEF ${f.sEF||'___'}%. Normal wall motion throughout.`},
+  {n:4,t:`${f.ecg||'No ischemic ECG changes'} during pharmacologic stress with ${f.agent||'regadenoson'}.`},
+  {n:5,t:`${f.cac||'No coronary artery calcification'}.`},
+ ]},
+
+{id:'i1',code:'.CPETISCHEMIA1V',section:'Ischemia',title:'Single-Vessel Ischemia — Normal Remote MBFR',tag:'a',
+ when:'Reversible defect in one territory, MBFR reduced in that territory, but remote territories have NORMAL MBFR — single-vessel disease likely.',risk:'hi',
+ groups:[
+  {g:'Perfusion Defect',fs:[
+    {id:'terr',l:'Affected territory',t:'seg',opts:['LAD','LCx','RCA'],multi:false},
+    {id:'ext',l:'Defect extent',t:'sel',opts:['mild','moderate','large']},
+    {id:'sss',l:'SSS',t:'num',ph:'0–68'},
+    {id:'sds',l:'SDS',t:'num',ph:'0–68'}]},
+  {g:'MBF / MBFR',fs:[
+    {id:'tMbfr',l:'MBFR — affected territory',t:'num',ph:'e.g. 1.5'},
+    {id:'tSev',l:'MBFR severity',t:'sel',opts:['mildly','moderately']},
+    {id:'lMbfr',l:'MBFR — LAD',t:'num',ph:'e.g. 2.8'},
+    {id:'cMbfr',l:'MBFR — LCx',t:'num',ph:'e.g. 3.1'},
+    {id:'rMbfr',l:'MBFR — RCA',t:'num',ph:'e.g. 2.9'}]},
+  {g:'LV Function',fs:[
+    {id:'lvG',l:'LV global function',t:'sel',opts:['Normal','Mildly reduced','Moderately reduced']},
+    {id:'rEF',l:'Rest LVEF (%)',t:'num',ph:'e.g. 55'},
+    {id:'sEF',l:'Stress LVEF (%)',t:'num',ph:'e.g. 60'},
+    {id:'wm',l:'Wall motion',t:'sel',opts:['Normal wall motion throughout','Regional wall motion abnormality in the affected territory','Hypokinesis in the affected territory','Akinesis in the affected territory']}]},
+  {g:'ECG & Stress',fs:[
+    {id:'agent',l:'Stress agent',t:'sel',opts:['regadenoson','adenosine']},
+    {id:'ecg',l:'ECG response',t:'sel',opts:['No ischemic ECG changes','Ischemic ECG changes (ST depression)','Borderline ischemic changes']}]},
+  {g:'Coronary Calcium',fs:[
+    {id:'cac',l:'CAC / CT',t:'sel',opts:['No coronary artery calcification','Mild CAC (1–100 AU)','Moderate CAC (101–400 AU)','Severe CAC (>400 AU)']}]},
+ ],
+ render:(f)=>{
+  const t=f.terr||'___';
+  const others=['LAD','LCx','RCA'].filter(x=>x!==t);
+  const gm=v=>v==='LAD'?f.lMbfr:v==='LCx'?f.cMbfr:f.rMbfr;
+  const rem=others.length?others.map(v=>`${v} (${gm(v)||'___'})`).join(' and '):'___';
+  return[
+   {n:1,t:`Abnormal study. Stress-induced ${f.ext||'___'}-sized reversible perfusion defect in the ${t} territory, consistent with ischemia.${(f.sss||f.sds)?` SSS ${f.sss||'___'}, SDS ${f.sds||'___'}.`:''}`},
+   {n:2,t:`Regional reduction in MBFR in the ${t} territory (${f.tMbfr||'___'} — ${f.tSev||'mildly'} abnormal). Normal MBFR in the remote territories ${rem} makes more extensive coronary artery disease unlikely.`},
+   {n:3,t:`${f.lvG||'Normal'} left ventricular systolic function. Rest LVEF ${f.rEF||'___'}%, stress LVEF ${f.sEF||'___'}%. ${f.wm||'Normal wall motion throughout'}.`},
+   {n:4,t:`${f.ecg||'No ischemic ECG changes'} during pharmacologic stress with ${f.agent||'regadenoson'}.`},
+   {n:5,t:`${f.cac||'No coronary artery calcification'}.`},
+  ];}},
+
+{id:'i2',code:'.CPETISCHEMIA1VGLOBAL',section:'Ischemia',title:'Single-Vessel Ischemia — Globally Reduced MBFR',tag:'a',
+ when:'Single-territory defect but MBFR is globally reduced — implies more extensive CAD than images suggest. HIGH RISK.',risk:'hi',
+ groups:[
+  {g:'Perfusion Defect',fs:[
+    {id:'terr',l:'Affected territory',t:'seg',opts:['LAD','LCx','RCA'],multi:false},
+    {id:'ext',l:'Defect extent',t:'sel',opts:['mild','moderate','large']}]},
+  {g:'MBF / MBFR',fs:[
+    {id:'gMbfr',l:'Global MBFR',t:'num',ph:'e.g. 1.6'},
+    {id:'lMbfr',l:'MBFR — LAD',t:'num',ph:'e.g. 1.4'},
+    {id:'cMbfr',l:'MBFR — LCx',t:'num',ph:'e.g. 1.7'},
+    {id:'rMbfr',l:'MBFR — RCA',t:'num',ph:'e.g. 1.8'}]},
+  {g:'LV Function',fs:[
+    {id:'lvG',l:'LV global function',t:'sel',opts:['Normal','Mildly reduced','Moderately reduced']},
+    {id:'rEF',l:'Rest LVEF (%)',t:'num',ph:'e.g. 52'},
+    {id:'sEF',l:'Stress LVEF (%)',t:'num',ph:'e.g. 55'}]},
+  {g:'ECG & Stress',fs:[
+    {id:'agent',l:'Stress agent',t:'sel',opts:['regadenoson','adenosine']},
+    {id:'ecg',l:'ECG response',t:'sel',opts:['No ischemic ECG changes','Ischemic ECG changes (ST depression)']}]},
+  {g:'Coronary Calcium',fs:[
+    {id:'cac',l:'CAC / CT',t:'sel',opts:['No coronary artery calcification','Mild CAC (1–100 AU)','Moderate CAC (101–400 AU)','Severe CAC (>400 AU)','Very severe CAC (>1000 AU)']}]},
+ ],
+ render:(f)=>[
+  {n:1,t:`Abnormal study. Stress-induced ${f.ext||'___'}-sized reversible perfusion defect in the ${f.terr||'___'} territory, consistent with ischemia.`},
+  {n:2,t:`While the perfusion study indicates single-vessel disease in the ${f.terr||'___'} territory, MBFR is globally reduced (${f.gMbfr||'___'} — abnormal), raising concern for more extensive coronary artery disease. Regional MBFR: LAD ${f.lMbfr||'___'}, LCx ${f.cMbfr||'___'}, RCA ${f.rMbfr||'___'}.`,hr:true},
+  {n:3,t:`${f.lvG||'Normal'} left ventricular systolic function. Rest LVEF ${f.rEF||'___'}%, stress LVEF ${f.sEF||'___'}%.`},
+  {n:4,t:`${f.ecg||'No ischemic ECG changes'} during pharmacologic stress with ${f.agent||'regadenoson'}.`},
+  {n:5,t:`${f.cac||'No coronary artery calcification'}.`},
+ ]},
+
+{id:'i3',code:'.CPETISCHEMIAMV',section:'Ischemia',title:'Multivessel Ischemia — High Risk',tag:'a',
+ when:'Reversible defects in ≥2 territories. Always enumerate all high-risk markers.',risk:'hi',
+ groups:[
+  {g:'Perfusion',fs:[
+    {id:'terrs',l:'Affected territories',t:'seg',opts:['LAD','LCx','RCA'],multi:true},
+    {id:'sss',l:'SSS',t:'num',ph:'0–68'},
+    {id:'sds',l:'SDS',t:'num',ph:'0–68'}]},
+  {g:'High-Risk Markers',fs:[
+    {id:'tid',l:'Transient ischemic dilation (TID) present',t:'chk'},
+    {id:'tidR',l:'TID ratio (if TID checked)',t:'num',ph:'e.g. 1.28'},
+    {id:'stun',l:'Post-ischemic EF drop / stunning present',t:'chk'}]},
+  {g:'MBF / MBFR',fs:[
+    {id:'gMbfr',l:'Global MBFR',t:'num',ph:'e.g. 1.4'},
+    {id:'mbCls',l:'MBFR classification',t:'sel',opts:['abnormal','highly abnormal']},
+    {id:'lMbfr',l:'MBFR — LAD',t:'num',ph:'e.g. 1.3'},
+    {id:'cMbfr',l:'MBFR — LCx',t:'num',ph:'e.g. 1.4'},
+    {id:'rMbfr',l:'MBFR — RCA',t:'num',ph:'e.g. 1.2'}]},
+  {g:'LV Function',fs:[
+    {id:'rEF',l:'Rest LVEF (%)',t:'num',ph:'e.g. 50'},
+    {id:'sEF',l:'Stress LVEF (%)',t:'num',ph:'e.g. 40'},
+    {id:'lvG',l:'LV global function',t:'sel',opts:['Mildly reduced','Moderately reduced','Severely reduced','Normal']}]},
+  {g:'ECG & Stress',fs:[
+    {id:'agent',l:'Stress agent',t:'sel',opts:['regadenoson','adenosine']},
+    {id:'ecg',l:'ECG response',t:'sel',opts:['No ischemic ECG changes','Ischemic ECG changes during stress','ST depression during stress']}]},
+  {g:'Coronary Calcium',fs:[
+    {id:'cac',l:'CAC / CT',t:'sel',opts:['No coronary artery calcification','Mild CAC (1–100 AU)','Moderate CAC (101–400 AU)','Severe CAC (>400 AU)','Very severe CAC (>1000 AU)']}]},
+ ],
+ render:(f)=>{
+  const tl=Array.isArray(f.terrs)?f.terrs:(f.terrs?[f.terrs]:[]);
+  const ts=tl.length?tl.join(' and '):'___';
+  const efDrop=(f.rEF&&f.sEF)?Math.round(f.rEF-f.sEF):null;
+  const lines=[{n:1,t:`Abnormal study. Stress-induced reversible perfusion defects in a multivessel pattern involving the ${ts} territories.${(f.sss||f.sds)?` SSS ${f.sss||'___'}, SDS ${f.sds||'___'}.`:''}`}];
+  if(f.tid) lines.push({n:lines.length+1,t:`Transient ischemic dilation of the left ventricle is present${f.tidR?` (TID ratio ${f.tidR})`:''}— a high-risk marker reflecting diffuse subendocardial ischemia.`,hr:true});
+  if(f.stun) lines.push({n:lines.length+1,t:`Post-ischemic stunning: stress LVEF ${f.sEF||'___'}% vs. rest LVEF ${f.rEF||'___'}%${efDrop&&efDrop>0?` — drop of ${efDrop}%`:''} — a high-risk marker for significant reversible ischemia.`,hr:true});
+  lines.push({n:lines.length+1,t:`Globally reduced myocardial blood flow reserve (MBFR = ${f.gMbfr||'___'} — ${f.mbCls||'abnormal'}) consistent with more extensive coronary artery disease than the perfusion images suggest. Regional MBFR: LAD ${f.lMbfr||'___'}, LCx ${f.cMbfr||'___'}, RCA ${f.rMbfr||'___'}.`,hr:true});
+  lines.push({n:lines.length+1,t:`${f.lvG||'Mildly reduced'} resting left ventricular systolic function (LVEF ${f.rEF||'___'}%).`});
+  lines.push({n:lines.length+1,t:`${f.cac||'No coronary artery calcification'}.`});
+  lines.push({n:lines.length+1,t:`${f.ecg||'No ischemic ECG changes'} during pharmacologic stress with ${f.agent||'regadenoson'}.`});
+  lines.push({n:lines.length+1,t:`Urgent clinical evaluation and likely coronary revascularization are strongly suggested given the constellation of high-risk findings.`,hr:true});
+  return lines;}},
+
+{id:'inf1',code:'.CPETINFARCT',section:'Infarction',title:'Fixed Defect — Infarction (No Ischemia)',tag:'a',
+ when:'Non-reversible perfusion defect without surrounding ischemia.',risk:'hi',
+ groups:[
+  {g:'Perfusion Defect',fs:[
+    {id:'terr',l:'Territory',t:'seg',opts:['LAD','LCx','RCA'],multi:false},
+    {id:'sz',l:'Infarct size',t:'sel',opts:['small','medium','large']}]},
+  {g:'MBF / MBFR',fs:[
+    {id:'tMbfr',l:'MBFR — infarct territory',t:'num',ph:'e.g. 1.3'},
+    {id:'remCls',l:'Remote MBFR',t:'sel',opts:['Normal','Mildly reduced']},
+    {id:'lMbfr',l:'MBFR — LAD',t:'num',ph:'e.g. 2.5'},
+    {id:'cMbfr',l:'MBFR — LCx',t:'num',ph:'e.g. 2.7'},
+    {id:'rMbfr',l:'MBFR — RCA',t:'num',ph:'e.g. 2.6'}]},
+  {g:'LV Function',fs:[
+    {id:'efCls',l:'LV EF severity',t:'sel',opts:['Mildly reduced','Moderately reduced','Severely reduced']},
+    {id:'rEF',l:'Rest LVEF (%)',t:'num',ph:'e.g. 45'},
+    {id:'wmType',l:'Wall motion abnormality',t:'sel',opts:['Hypokinesis','Akinesis','Dyskinesis']},
+    {id:'wmLoc',l:'Wall motion location',t:'txt',ph:'e.g. distal anterior wall and apex'}]},
+  {g:'ECG & Stress',fs:[
+    {id:'agent',l:'Stress agent',t:'sel',opts:['regadenoson','adenosine']},
+    {id:'ecg',l:'ECG response',t:'sel',opts:['No ischemic ECG changes','Nonischemic ECG response']}]},
+  {g:'Coronary Calcium',fs:[
+    {id:'cac',l:'CAC / CT',t:'sel',opts:['No coronary artery calcification','Mild CAC (1–100 AU)','Moderate CAC (101–400 AU)','Severe CAC (>400 AU)']}]},
+ ],
+ render:(f)=>{
+  const t=f.terr||'___';
+  const others=['LAD','LCx','RCA'].filter(x=>x!==t);
+  const gm=v=>v==='LAD'?f.lMbfr:v==='LCx'?f.cMbfr:f.rMbfr;
+  const rem=others.map(v=>`${v} (${gm(v)||'___'})`).join(', ');
+  return[
+   {n:1,t:`Abnormal study. ${f.sz||'___'}-sized fixed perfusion defect in the ${t} territory, consistent with prior myocardial infarction. No surrounding ischemia identified.`},
+   {n:2,t:`MBFR in the infarct territory (${f.tMbfr||'___'}) reflects fixed flow reduction. ${f.remCls||'Normal'} MBFR in remote territories (${rem}) makes significant additional ischemia unlikely.`},
+   {n:3,t:`${f.efCls||'Mildly reduced'} resting left ventricular systolic function (LVEF ${f.rEF||'___'}%). ${f.wmType||'Hypokinesis'}${f.wmLoc?' in the '+f.wmLoc:''}.`},
+   {n:4,t:`${f.ecg||'No ischemic ECG changes'} during pharmacologic stress with ${f.agent||'regadenoson'}.`},
+   {n:5,t:`${f.cac||'No coronary artery calcification'}.`},
+  ];}},
+
+{id:'inf2',code:'.CPETPERIINFARCT',section:'Infarction',title:'Peri-Infarction Ischemia (Mixed)',tag:'a',
+ when:'Fixed defect with surrounding reversible defect — infarction with peri-infarction ischemia.',risk:'hi',
+ groups:[
+  {g:'Perfusion Defect',fs:[
+    {id:'terr',l:'Territory',t:'seg',opts:['LAD','LCx','RCA'],multi:false},
+    {id:'fixSeg',l:'Fixed defect location',t:'txt',ph:'e.g. inferoseptal apex'},
+    {id:'revSeg',l:'Reversible defect location',t:'txt',ph:'e.g. anterior and apical segments'}]},
+  {g:'MBF / MBFR',fs:[
+    {id:'tMbfr',l:'MBFR — affected territory',t:'num',ph:'e.g. 1.4'},
+    {id:'tSev',l:'Severity',t:'sel',opts:['mildly','moderately']},
+    {id:'lMbfr',l:'MBFR — LAD',t:'num',ph:'e.g. 2.5'},
+    {id:'cMbfr',l:'MBFR — LCx',t:'num',ph:'e.g. 3.1'},
+    {id:'rMbfr',l:'MBFR — RCA',t:'num',ph:'e.g. 2.9'},
+    {id:'remPat',l:'Remote MBFR pattern',t:'sel',opts:['normal — more extensive disease unlikely','globally reduced — raises concern for more extensive disease']}]},
+  {g:'LV Function',fs:[
+    {id:'efCls',l:'LV EF',t:'sel',opts:['Normal','Mildly reduced','Moderately reduced']},
+    {id:'rEF',l:'Rest LVEF (%)',t:'num',ph:'e.g. 48'},
+    {id:'sEF',l:'Stress LVEF (%)',t:'num',ph:'e.g. 52'},
+    {id:'wmType',l:'Wall motion',t:'sel',opts:['Hypokinesis','Akinesis']}]},
+  {g:'ECG & Stress',fs:[
+    {id:'agent',l:'Stress agent',t:'sel',opts:['regadenoson','adenosine']},
+    {id:'ecg',l:'ECG response',t:'sel',opts:['No ischemic ECG changes','Ischemic ECG changes']}]},
+  {g:'Coronary Calcium',fs:[
+    {id:'cac',l:'CAC / CT',t:'sel',opts:['No coronary artery calcification','Mild CAC (1–100 AU)','Moderate CAC (101–400 AU)','Severe CAC (>400 AU)']}]},
+ ],
+ render:(f)=>{
+  const t=f.terr||'___';
+  const others=['LAD','LCx','RCA'].filter(x=>x!==t);
+  const gm=v=>v==='LAD'?f.lMbfr:v==='LCx'?f.cMbfr:f.rMbfr;
+  const rem=others.map(v=>`${v} (${gm(v)||'___'})`).join(', ');
+  return[
+   {n:1,t:`Abnormal study. Peri-infarction ischemia in the ${t} territory: fixed defect in the ${f.fixSeg||'___'} with a surrounding reversible defect in the ${f.revSeg||'___'}, consistent with infarction with peri-infarction ischemia.`},
+   {n:2,t:`Regional reduction in MBFR in the ${t} territory (${f.tMbfr||'___'} — ${f.tSev||'mildly'} abnormal). Remote territories (${rem}) show MBFR that is ${f.remPat||'normal'}.`},
+   {n:3,t:`${f.efCls||'Mildly reduced'} left ventricular systolic function. Rest LVEF ${f.rEF||'___'}%, stress LVEF ${f.sEF||'___'}%. ${f.wmType||'Hypokinesis'} in the ${t} territory.`},
+   {n:4,t:`${f.ecg||'No ischemic ECG changes'} during pharmacologic stress with ${f.agent||'regadenoson'}.`},
+   {n:5,t:`${f.cac||'No coronary artery calcification'}.`},
+  ];}},
+
+{id:'d1',code:'.CPETDISCORDMILD',section:'Discordance / MBFR Patterns',title:'Normal Perfusion — Mildly Reduced MBFR (1.7–2.0)',tag:'m',
+ when:'Normal static images, global MBFR 1.7–2.0. Intermediate risk — interpret in clinical context.',risk:'int',
+ groups:[
+  {g:'MBF / MBFR',fs:[
+    {id:'gMbfr',l:'Global MBFR',t:'num',ph:'1.7–2.0'},
+    {id:'lMbfr',l:'MBFR — LAD',t:'num',ph:'e.g. 1.9'},
+    {id:'cMbfr',l:'MBFR — LCx',t:'num',ph:'e.g. 2.0'},
+    {id:'rMbfr',l:'MBFR — RCA',t:'num',ph:'e.g. 1.8'}]},
+  {g:'Clinical Interpretation',fs:[
+    {id:'interp',l:'Interpreted as',t:'sel',opts:['low-to-intermediate risk given clinical context','of uncertain significance — clinical correlation recommended','mildly elevated risk; follow-up imaging recommended']},
+    {id:'ctx',l:'Clinical context',t:'txt',ph:'e.g. older age, low CAC, asymptomatic'}]},
+  {g:'LV Function',fs:[
+    {id:'rEF',l:'Rest LVEF (%)',t:'num',ph:'e.g. 62'},
+    {id:'sEF',l:'Stress LVEF (%)',t:'num',ph:'e.g. 68'}]},
+  {g:'ECG & Stress',fs:[
+    {id:'agent',l:'Stress agent',t:'sel',opts:['regadenoson','adenosine']},
+    {id:'ecg',l:'ECG response',t:'sel',opts:['No ischemic ECG changes','Nonischemic ECG response']}]},
+  {g:'Coronary Calcium',fs:[
+    {id:'cac',l:'CAC / CT',t:'sel',opts:['No coronary artery calcification','Mild CAC (1–100 AU)','Moderate CAC (101–400 AU)','Severe CAC (>400 AU)']}]},
+ ],
+ render:(f)=>[
+  {n:1,t:'Normal static PET myocardial perfusion images at rest and with stress. No evidence of vasodilator-induced ischemia.'},
+  {n:2,t:`Mildly abnormal global myocardial blood flow reserve (MBFR = ${f.gMbfr||'___'}) in the absence of a perfusion defect. Regional MBFR: LAD ${f.lMbfr||'___'}, LCx ${f.cMbfr||'___'}, RCA ${f.rMbfr||'___'}. In the context of ${f.ctx||'the clinical picture'}, this is interpreted as ${f.interp||'low-to-intermediate risk'}.`},
+  {n:3,t:`Normal left ventricular size and systolic function. Rest LVEF ${f.rEF||'___'}%, stress LVEF ${f.sEF||'___'}%.`},
+  {n:4,t:`${f.ecg||'No ischemic ECG changes'} during pharmacologic stress with ${f.agent||'regadenoson'}.`},
+  {n:5,t:`${f.cac||'No coronary artery calcification'}.`},
+ ]},
+
+{id:'d2',code:'.CPETDISCORDABNL',section:'Discordance / MBFR Patterns',title:'Normal Perfusion — Abnormal MBFR (CMD / MVD)',tag:'m',
+ when:'Normal static images but MBFR 1.2–<1.7 with no technical factor. Likely CMD or diffuse epicardial CAD.',risk:'hi',
+ groups:[
+  {g:'MBF / MBFR',fs:[
+    {id:'gMbfr',l:'Global MBFR',t:'num',ph:'1.2–1.7'},
+    {id:'lMbfr',l:'MBFR — LAD',t:'num',ph:'e.g. 1.6'},
+    {id:'cMbfr',l:'MBFR — LCx',t:'num',ph:'e.g. 1.5'},
+    {id:'rMbfr',l:'MBFR — RCA',t:'num',ph:'e.g. 1.7'}]},
+  {g:'Clinical Pattern',fs:[
+    {id:'etio',l:'Most likely etiology',t:'sel',opts:['coronary microvascular dysfunction (CMD)','diffuse epicardial coronary artery disease','a combination of diffuse epicardial CAD and microvascular disease']},
+    {id:'cacCtx',l:'CAC context',t:'sel',opts:['low / absent coronary artery calcification','mild coronary artery calcification','moderate coronary artery calcification']}]},
+  {g:'LV Function',fs:[
+    {id:'efRes',l:'EF reserve',t:'sel',opts:['Normal LVEF reserve','Blunted LVEF reserve (<5% augmentation)']},
+    {id:'rEF',l:'Rest LVEF (%)',t:'num',ph:'e.g. 62'},
+    {id:'sEF',l:'Stress LVEF (%)',t:'num',ph:'e.g. 64'}]},
+  {g:'ECG & Stress',fs:[
+    {id:'agent',l:'Stress agent',t:'sel',opts:['regadenoson','adenosine']},
+    {id:'ecg',l:'ECG response',t:'sel',opts:['No ischemic ECG changes','Nonischemic ECG response']}]},
+  {g:'Coronary Calcium',fs:[
+    {id:'cac',l:'CAC / CT',t:'sel',opts:['No coronary artery calcification','Mild CAC (1–100 AU)','Moderate CAC (101–400 AU)','Severe CAC (>400 AU)']}]},
+ ],
+ render:(f)=>[
+  {n:1,t:'Normal static PET myocardial perfusion images at rest and with stress. No evidence of vasodilator-induced ischemia.'},
+  {n:2,t:`Despite normal myocardial perfusion, global MBFR is abnormal (MBFR = ${f.gMbfr||'___'}), placing the patient in a higher risk category for coronary artery disease and cardiac-related events. Regional MBFR: LAD ${f.lMbfr||'___'}, LCx ${f.cMbfr||'___'}, RCA ${f.rMbfr||'___'}.`,hr:true},
+  {n:3,t:`In the setting of ${f.cacCtx||'the clinical picture'} and absence of technical factors, this pattern is most consistent with ${f.etio||'coronary microvascular dysfunction (CMD)'}. Clinical correlation and further evaluation are recommended.`},
+  {n:4,t:`${f.efRes||'Normal LVEF reserve'}. Rest LVEF ${f.rEF||'___'}%, stress LVEF ${f.sEF||'___'}%.`},
+  {n:5,t:`${f.ecg||'No ischemic ECG changes'} during pharmacologic stress with ${f.agent||'regadenoson'}.`},
+  {n:6,t:`${f.cac||'No coronary artery calcification'}.`},
+ ]},
+
+{id:'d3',code:'.CPETMBFRLOW',section:'Discordance / MBFR Patterns',title:'Normal Perfusion — MBFR <1.2 (Rule Out Antagonist)',tag:'m',
+ when:'Normal perfusion + MBFR <1.2. Always rule out caffeine/vasodilator antagonist before concluding.',risk:'int',
+ groups:[
+  {g:'MBF / MBFR',fs:[
+    {id:'gMbfr',l:'Global MBFR',t:'num',ph:'<1.2'}]},
+  {g:'Technical Assessment',fs:[
+    {id:'spleen',l:'Splenic switch-off',t:'sel',opts:['Present (vasodilator antagonist unlikely)','Absent — raises concern for circulating antagonist','Not assessed']},
+    {id:'hrResp',l:'Heart rate response',t:'txt',ph:'e.g. increased 12 bpm'},
+    {id:'antag',l:'Vasodilator antagonist status',t:'sel',opts:['Not identified — caffeine abstinence confirmed','Cannot be excluded — abstinence not confirmed','Confirmed caffeine exposure within 48 hours']}]},
+  {g:'Interpretation',fs:[
+    {id:'interp',l:'Result interpretation',t:'sel',opts:['indeterminate for differentiating epicardial CAD from microvascular disease','nondiagnostic — repeat testing recommended after antagonist exclusion','potentially nondiagnostic — clinical context required']},
+    {id:'rec',l:'Recommended next step',t:'sel',opts:['Repeat testing after confirmed caffeine abstinence (48 hours)','CCTA to evaluate for non-calcified plaque','Invasive coronary angiography with provocative testing','Clinical correlation — no immediate action required']}]},
+  {g:'LV Function',fs:[
+    {id:'rEF',l:'Rest LVEF (%)',t:'num',ph:'e.g. 60'},
+    {id:'sEF',l:'Stress LVEF (%)',t:'num',ph:'e.g. 62'}]},
+  {g:'Coronary Calcium',fs:[
+    {id:'cac',l:'CAC / CT',t:'sel',opts:['No coronary artery calcification','Mild CAC (1–100 AU)','Moderate CAC (101–400 AU)','Severe CAC (>400 AU)']}]},
+ ],
+ render:(f)=>[
+  {n:1,t:'Normal static PET myocardial perfusion images at rest and with stress. No evidence of vasodilator-induced ischemia.'},
+  {n:2,t:`Global MBFR is markedly reduced (${f.gMbfr||'___'}) without a corresponding perfusion defect. Splenic switch-off: ${f.spleen||'not assessed'}. Heart rate response: ${f.hrResp||'not specified'}. ${f.antag||'Vasodilator antagonist status not confirmed'}.`},
+  {n:3,t:`This result is ${f.interp||'indeterminate'} for differentiating epicardial CAD from microvascular disease. ${f.rec||'Clinical correlation recommended'}.`},
+  {n:4,t:`Normal left ventricular systolic function. Rest LVEF ${f.rEF||'___'}%, stress LVEF ${f.sEF||'___'}%.`},
+  {n:5,t:`${f.cac||'No coronary artery calcification'}.`},
+ ]},
+
+{id:'d4',code:'.CPETMBFRHIGHREST',section:'Discordance / MBFR Patterns',title:'Low MBFR Driven by Elevated Resting MBF',tag:'m',
+ when:'Rest MBF >1.0 mL/min/g causing low MBFR despite normal stress MBF. High O₂ demand state.',risk:'low',
+ groups:[
+  {g:'MBF / MBFR',fs:[
+    {id:'gMbfr',l:'Global MBFR',t:'num',ph:'e.g. 2.05'},
+    {id:'rMBF',l:'Global rest MBF (mL/min/g)',t:'num',ph:'e.g. 1.38'},
+    {id:'sMBF',l:'Global stress MBF (mL/min/g)',t:'num',ph:'e.g. 2.85'}]},
+  {g:'Clinical Context',fs:[
+    {id:'ctx',l:'Contributing factors',t:'sel',opts:['hypertension and obesity','obesity (elevated BMI)','hypertension','tachycardia at baseline','hypertension, obesity, and type 2 diabetes','high cardiac output state']}]},
+  {g:'LV Function',fs:[
+    {id:'rEF',l:'Rest LVEF (%)',t:'num',ph:'e.g. 62'},
+    {id:'sEF',l:'Stress LVEF (%)',t:'num',ph:'e.g. 70'}]},
+  {g:'ECG & Stress',fs:[
+    {id:'agent',l:'Stress agent',t:'sel',opts:['regadenoson','adenosine']},
+    {id:'ecg',l:'ECG response',t:'sel',opts:['No ischemic ECG changes','Nonischemic ECG response']}]},
+  {g:'Coronary Calcium',fs:[
+    {id:'cac',l:'CAC / CT',t:'sel',opts:['No coronary artery calcification','Mild CAC (1–100 AU)','Moderate CAC (101–400 AU)']}]},
+ ],
+ render:(f)=>[
+  {n:1,t:'Normal static PET myocardial perfusion images at rest and with stress.'},
+  {n:2,t:`Global MBFR is reduced (${f.gMbfr||'___'}); however, this is primarily driven by an elevated resting myocardial blood flow (${f.rMBF||'___'} mL/min/g), as may be observed in states associated with increased myocardial oxygen demand (${f.ctx||'obesity and hypertension'}). Stress MBF values are within normal limits (${f.sMBF||'___'} mL/min/g globally).`},
+  {n:3,t:`Normal left ventricular size and systolic function. Rest LVEF ${f.rEF||'___'}%, stress LVEF ${f.sEF||'___'}%.`},
+  {n:4,t:`${f.ecg||'No ischemic ECG changes'} during pharmacologic stress with ${f.agent||'regadenoson'}.`},
+  {n:5,t:`${f.cac||'No coronary artery calcification'}.`},
+ ]},
+
+// ── SECTION 7: Standalone lines ──────────────────────────────────
+{id:'m1',code:'.CPETMBFRNORMAL',section:'Standalone MBFR Lines',title:'MBFR Line — Normal',tag:'m',solo:true,
+ when:'Drop-in sentence for impression point 2 when MBFR is normal.',risk:'low',
+ groups:[{g:'Value',fs:[{id:'gMbfr',l:'Global MBFR',t:'num',ph:'e.g. 3.4'}]}],
+ render:(f)=>`Normal global myocardial blood flow reserve (MBFR = ${f.gMbfr||'___'}) confirms study normalcy, indicating a lower risk of coronary artery disease beyond normal perfusion and predicting a low risk for major coronary-related events.`},
+
+{id:'m2',code:'.CPETMBFRMILD',section:'Standalone MBFR Lines',title:'MBFR Line — Mildly Abnormal (1.7–2.0)',tag:'m',solo:true,
+ when:'Drop-in MBFR statement for mildly abnormal MBFR.',risk:'int',
+ groups:[{g:'Values',fs:[
+  {id:'gMbfr',l:'Global MBFR',t:'num',ph:'1.7–2.0'},
+  {id:'ctx',l:'Clinical context',t:'txt',ph:'e.g. older age, low CAC, asymptomatic'}]}],
+ render:(f)=>`Mildly abnormal global myocardial blood flow reserve (MBFR = ${f.gMbfr||'___'}). In the context of ${f.ctx||'the clinical picture'}, this is interpreted as low-to-intermediate risk. Clinical correlation with age, sex, coronary calcium, and symptoms is recommended.`},
+
+{id:'m3',code:'.CPETMBFRABNL',section:'Standalone MBFR Lines',title:'MBFR Line — Abnormal (1.2–<1.7)',tag:'m',solo:true,
+ when:'Drop-in MBFR statement for abnormal MBFR.',risk:'hi',
+ groups:[{g:'Values',fs:[
+  {id:'gMbfr',l:'Global MBFR',t:'num',ph:'1.2–<1.7'},
+  {id:'lMbfr',l:'MBFR — LAD',t:'num',ph:'e.g. 1.5'},
+  {id:'cMbfr',l:'MBFR — LCx',t:'num',ph:'e.g. 1.6'},
+  {id:'rMbfr',l:'MBFR — RCA',t:'num',ph:'e.g. 1.4'}]}],
+ render:(f)=>`Abnormal global myocardial blood flow reserve (MBFR = ${f.gMbfr||'___'}), placing the patient in a higher risk category for coronary artery disease and cardiac-related events. Regional MBFR: LAD ${f.lMbfr||'___'}, LCx ${f.cMbfr||'___'}, RCA ${f.rMbfr||'___'}.`},
+
+{id:'m4',code:'.CPETMBFRHIGHABNL',section:'Standalone MBFR Lines',title:'MBFR Line — Highly Abnormal (<1.2 + defect)',tag:'m',solo:true,
+ when:'Drop-in MBFR statement for highly abnormal MBFR with perfusion defect.',risk:'hi',
+ groups:[{g:'Values',fs:[
+  {id:'gMbfr',l:'Global MBFR',t:'num',ph:'<1.2'},
+  {id:'lMbfr',l:'MBFR — LAD',t:'num',ph:'e.g. 1.0'},
+  {id:'cMbfr',l:'MBFR — LCx',t:'num',ph:'e.g. 1.1'},
+  {id:'rMbfr',l:'MBFR — RCA',t:'num',ph:'e.g. 1.1'}]}],
+ render:(f)=>`Highly abnormal global myocardial blood flow reserve (MBFR = ${f.gMbfr||'___'}) in the setting of perfusion defect(s). This corresponds to a very high risk for major coronary-related events. Regional MBFR: LAD ${f.lMbfr||'___'}, LCx ${f.cMbfr||'___'}, RCA ${f.rMbfr||'___'}.`},
+
+{id:'m5',code:'.CPETMBFRSVD',section:'Standalone MBFR Lines',title:'MBFR Line — Single-Vessel, Normal Remote',tag:'m',solo:true,
+ when:'Single-vessel defect with corresponding MBFR reduction; remote territories are normal.',risk:'hi',
+ groups:[{g:'Values',fs:[
+  {id:'terr',l:'Affected territory',t:'seg',opts:['LAD','LCx','RCA'],multi:false},
+  {id:'tMbfr',l:'MBFR — affected territory',t:'num',ph:'e.g. 1.4'},
+  {id:'tSev',l:'Severity',t:'sel',opts:['mildly','moderately']},
+  {id:'lMbfr',l:'MBFR — LAD',t:'num',ph:'e.g. 2.8'},
+  {id:'cMbfr',l:'MBFR — LCx',t:'num',ph:'e.g. 3.0'},
+  {id:'rMbfr',l:'MBFR — RCA',t:'num',ph:'e.g. 2.9'}]}],
+ render:(f)=>{
+  const t=f.terr||'___';
+  const others=['LAD','LCx','RCA'].filter(x=>x!==t);
+  const gm=v=>v==='LAD'?f.lMbfr:v==='LCx'?f.cMbfr:f.rMbfr;
+  const rem=others.map(v=>`${v} (${gm(v)||'___'})`).join(', ');
+  return `There is a perfusion defect in the ${t} territory with a corresponding regional reduction in MBFR (${f.tMbfr||'___'} — ${f.tSev||'mildly'} abnormal). Normal MBFR within the remainder of the myocardium (${rem}) makes more extensive coronary artery disease unlikely.`;}},
+
+{id:'m6',code:'.CPETMBFRCMD',section:'Standalone MBFR Lines',title:'MBFR Line — CMD / Discordance',tag:'m',solo:true,
+ when:'Normal perfusion with abnormal MBFR — CMD/MVD discordance pattern.',risk:'hi',
+ groups:[{g:'Value',fs:[{id:'gMbfr',l:'Global MBFR',t:'num',ph:'e.g. 1.6'}]}],
+ render:(f)=>`Despite normal myocardial perfusion imaging, global MBFR is abnormal (${f.gMbfr||'___'}), placing the patient in a higher risk category for coronary artery disease and cardiac-related events. In patients without known coronary artery disease, this pattern may be consistent with coronary microvascular dysfunction, diffuse epicardial disease, or a combination.`},
+];
+
+// ── APP ───────────────────────────────────────────────────────────
+
+function App(){
+  const [selId,setSel]=useState(null);
+  const [vals,setVals]=useState({});
+
+  const phrase=selId?P.find(p=>p.id===selId):null;
+
+  function selectPhrase(id){
+    const p=P.find(x=>x.id===id);
+    const defs={};
+    if(p) p.groups.forEach(g=>g.fs.forEach(f=>{
+      if(f.t==='sel') defs[f.id]=f.opts[0];
+      if(f.t==='seg') defs[f.id]=f.multi?[]:null;
+      if(f.t==='chk') defs[f.id]=false;
+    }));
+    setSel(id);setVals(defs);
+  }
+
+  function setVal(k,v){setVals(prev=>({...prev,[k]:v}));}
+
+  // sections
+  const sections=[...new Set(P.map(p=>p.section))];
+
+  // plain text
+  function plainText(){
+    if(!phrase) return '';
+    const r=phrase.render(vals);
+    if(typeof r==='string') return r.replace(/___/g,'[fill in]');
+    return r.map(l=>`${l.n}. ${l.t}`).join('\n\n').replace(/___/g,'[fill in]');
+  }
+
+  function copyIt(){
+    const t=plainText();
+    if(!t) return;
+    navigator.clipboard.writeText(t).then(()=>{
+      const el=document.getElementById('toast');
+      el.classList.add('on');
+      setTimeout(()=>el.classList.remove('on'),2000);
+    });
+  }
+
+  return h('div',{id:'root'},
+    // header
+    h('div',{className:'hdr'},
+      h('div',{style:{flex:1}},
+        h('div',{className:'hdr-title'},'Cardiac PET — Dot Phrase Builder'),
+        h('div',{className:'hdr-sub'},'Interactive impression generator · ASNC 2024 · MBF Practice Points 2025')
+      ),
+      h('span',{className:'hdr-badge'},'Epic SmartPhrase')
+    ),
+    // body
+    h('div',{className:'body'},
+      // sidebar
+      h('div',{className:'sb'},
+        sections.map(sec=>{
+          const items=P.filter(p=>p.section===sec);
+          return h('div',{key:sec},
+            h('div',{className:'sb-sec-label'},sec),
+            items.map(p=>h('button',{key:p.id,className:'sc-btn'+(selId===p.id?' act':''),onClick:()=>selectPhrase(p.id)},
+              h('div',{className:'sc-code'},p.code),
+              h('div',{className:'sc-name'},p.title),
+              h('span',{className:'sc-tag tag-'+(p.tag||'n')},p.tag==='n'?'Normal':p.tag==='a'?'Abnormal':'MBF/MBFR')
+            ))
+          );
+        })
+      ),
+
+      // form panel
+      h('div',{className:'fp'},
+        !phrase
+          ? h('div',{style:{padding:'40px 20px',textAlign:'center',color:'var(--text3)'}},
+              h('div',{style:{fontSize:36,marginBottom:8}},'←'),
+              'Select a scenario')
+          : h('div',{},
+              h('div',{className:'fp-head'},
+                h('div',{className:'fp-code'},phrase.code),
+                h('div',{className:'fp-title'},phrase.title),
+                phrase.when&&h('div',{className:'fp-when'},phrase.when)
+              ),
+              h('div',{className:'fp-body'},
+                phrase.groups.map(g=>h('div',{key:g.g,className:'fg'},
+                  h('div',{className:'fg-label'},g.g),
+                  g.fs.map(f=>{
+                    const v=vals[f.id];
+                    const sv=k=>setVal(k,v);
+                    if(f.t==='seg'){
+                      const sel=f.multi?(Array.isArray(v)?v:[]):(v?[v]:[]);
+                      const tog=opt=>{
+                        if(f.multi){
+                          const nx=sel.includes(opt)?sel.filter(x=>x!==opt):[...sel,opt];
+                          setVal(f.id,nx);
+                        } else setVal(f.id,sel.includes(opt)?null:opt);
+                      };
+                      return h('div',{key:f.id,className:'fld'},
+                        h('label',{},f.l+(f.multi?' (select all that apply)':'')),
+                        h('div',{className:'seg-tog'},
+                          f.opts.map(o=>h('button',{key:o,type:'button',
+                            className:'seg-b'+(sel.includes(o)?' on':''),onClick:()=>tog(o)},o))
+                        )
+                      );
+                    }
+                    if(f.t==='chk'){
+                      return h('label',{key:f.id,className:'chk-row'},
+                        h('input',{type:'checkbox',checked:!!v,onChange:e=>setVal(f.id,e.target.checked)}),
+                        h('div',{className:'chk-lbl'},h('b',{},f.l))
+                      );
+                    }
+                    if(f.t==='sel'){
+                      return h('div',{key:f.id,className:'fld'},
+                        h('label',{},f.l),
+                        h('select',{value:v||f.opts[0],onChange:e=>setVal(f.id,e.target.value)},
+                          f.opts.map(o=>h('option',{key:o,value:o},o)))
+                      );
+                    }
+                    // num or txt
+                    return h('div',{key:f.id,className:'fld'},
+                      h('label',{},f.l),
+                      h('input',{type:'text',inputMode:f.t==='num'?'decimal':'text',
+                        value:v||'',placeholder:f.ph||'',onChange:e=>setVal(f.id,e.target.value)})
+                    );
+                  })
+                ))
+              )
+            )
+      ),
+
+      // preview panel
+      h('div',{className:'pv'},
+        h('div',{className:'pv-head'},
+          h('div',{className:'pv-label'},phrase?'Live Preview — '+phrase.code:'Preview'),
+          phrase&&h('button',{className:'btn btn-p',onClick:copyIt},'Copy for Epic')
+        ),
+        !phrase
+          ? h('div',{className:'empty'},
+              h('div',{className:'empty-icon'},'📋'),
+              h('p',{},'Select a scenario from the left, fill in the values, and your impression will appear here.')
+            )
+          : h('div',{className:'pv-body'},
+              h('div',{className:'pv-box'},
+                // risk banner
+                h('div',{className:phrase.risk==='low'?'risk-low':phrase.risk==='int'?'risk-int':'risk-hi'},
+                  phrase.risk==='low'?'✓  Low-risk pattern':
+                  phrase.risk==='int'?'⚠  Intermediate-risk pattern — clinical correlation recommended':
+                  '⚠  High-risk pattern — enumerate all high-risk markers in impression'
+                ),
+                h('div',{className:'sec-ttl'},'IMPRESSION'),
+                // render
+                (()=>{
+                  const r=phrase.render(vals);
+                  if(typeof r==='string'){
+                    // solo
+                    const parts=[];
+                    r.split('___').forEach((seg,i,arr)=>{
+                      parts.push(h('span',{key:'t'+i},seg));
+                      if(i<arr.length-1) parts.push(h('span',{key:'b'+i,className:'blank'},'[ fill in ]'));
+                    });
+                    return h('div',{className:'pv-solo'},parts);
+                  }
+                  return r.map(line=>{
+                    const parts=[];
+                    line.t.split('___').forEach((seg,i,arr)=>{
+                      parts.push(h('span',{key:'t'+i,style:line.hr?{color:'var(--red)',fontWeight:500}:{}},seg));
+                      if(i<arr.length-1) parts.push(h('span',{key:'b'+i,className:'blank'},'[ fill in ]'));
+                    });
+                    return h('div',{key:line.n,className:'pv-line'},
+                      h('span',{className:'pv-num'},line.n+'.'),
+                      h('div',{className:'pv-txt'},parts)
+                    );
+                  });
+                })(),
+                h('div',{className:'pv-foot'},
+                  h('span',{className:'blank'},'Gray italic'),' = unfilled field — fill in the form to complete. Click "Copy for Epic" to copy clean text.'
+                )
+              )
+            )
+      )
+    )
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>
+</body>
+</html>
